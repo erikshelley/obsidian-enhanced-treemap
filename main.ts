@@ -1,4 +1,5 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, MarkdownRenderChild } from 'obsidian';
+import { d3Template } from 'd3-template.js';
 
 interface EnhancedTreemapSettings {
 	mySetting: string;
@@ -31,228 +32,87 @@ var globalEval = function globalEval(src) {
     fn();
 };
 
+export class EnhancedTreeMap extends MarkdownRenderChild {
+    text: string;
 
-// https://d3-graph-gallery.com/graph/treemap_custom.html - beautiful example
-// https://www.d3indepth.com/hierarchies/ - good information breakdown
-var d3Template = `
-    function wrap(text) {
-        text.each(function () {
-            var text = d3.select(this),
-                words = text.text().split(/\\s+/).reverse(),
-                word,
-                longline,
-                splits,
-                i,
-                line = [],
-                lineNumber = 0,
-                lineHeight = 1.1, // ems
-                x = text.attr("x"),
-                y = text.attr("y"),
-                //width = text.attr("width"),
-                width = parseFloat(text.attr("width")),
-                height = parseFloat(text.attr("height")),
-                fontsize = parseFloat(text.attr("font-size").substring(0, text.attr("font-size").length - 2)),
-                dy = 0, //parseFloat(text.attr("dy")),
-                tspan = text.text(null)
-                            .append("tspan")
-                            .attr("x", x)
-                            .attr("y", y)
-                            .attr("dy", dy + "em");
-            while (word = words.pop()) {
-                line.push(word);
-                tspan.text(line.join(" "));
-                if ((lineNumber + 2) * lineHeight * fontsize >= height) {
-                    tspan.text("...");
-                }
-                if (tspan.node().getComputedTextLength() > width) {
-                    line.pop();
-                    tspan.text(line.join(" "));
-
-                    // if a single word is too long, break it in half
-                    if (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
-                        longline = tspan.text();
-                        splits = 1;
-                        while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
-                            splits++;
-                            tspan.text(longline.substring(0, longline.length/splits) + "-");
-                        }
-                        for (i=2; i<=splits; i++) {
-                            if ((lineNumber + 1) * lineHeight * fontsize >= height) {
-                                tspan.text("...");
-                            }
-                            else {
-                                tspan = text.append("tspan")
-                                            .attr("x", x)
-                                            .attr("y", y)
-                                            .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                                            .text(longline.substring((i - 1) * longline.length / splits, i * longline.length / splits) + (i < splits ? "-" : ""));
-                            }
-                        }
-                    }
-
-                    line = [word];
-                    if ((lineNumber + 1) * lineHeight * fontsize >= height) {
-                        tspan.text("...");
-                    }
-                    tspan = text.append("tspan")
-                                .attr("x", x)
-                                .attr("y", y)
-                                .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                                .text(word);
-
-                    // if last word is too long, break it in half
-                    if (words.length == 0 && tspan.node().getComputedTextLength() > width) {
-                        longline = tspan.text();
-                        splits = 1;
-                        while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
-                            splits++;
-                            tspan.text(longline.substring(0, longline.length/splits) + "-");
-                        }
-                        for (i=2; i<=splits; i++) {
-                            if ((lineNumber + 1) * lineHeight * fontsize >= height) {
-                                tspan.text("...");
-                            }
-                            else {
-                                tspan = text.append("tspan")
-                                            .attr("x", x)
-                                            .attr("y", y)
-                                            .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                                            .text(longline.substring((i - 1) * longline.length / splits, i * longline.length / splits) + (i < splits ? "-" : ""));
-                            }
-                        }
-                    }
-                }
-            }
-            if (lineNumber > 0) {
-                const startDy = -(lineNumber * (lineHeight / 2));
-                text.selectAll("tspan").attr("dy", (d, i) => startDy + lineHeight * i + "em");
-            }
-        });
-    };
-
-    function ellipse(text) {
-        text.each(function() {
-            var text = d3.select(this);
-            var width = parseFloat(text.attr("width"));
-            var original = text.text();
-            var tspan = text.text("").append("tspan").text(original);
-            if (tspan.node().getComputedTextLength() <= width) return;
-            tspan.text(original + "...");
-            while (tspan.node().getComputedTextLength() > width & tspan.text().length > 3) {
-                tspan.text(tspan.text().substring(0, tspan.text().length - 4) + "...");
-            }
-        });
+    constructor(containerEl: HTMLElement, text: string) {
+        super(containerEl);
+        this.text = text;
     }
 
-    function ellipsebyword(text) {
-        text.each(function() {
-            var text = d3.select(this);
-            var words = text.text().split(/\\s+/);
-            
-            var ellipsis = text.text("").append("tspan").text("...");
-            var width = parseFloat(text.attr("width")) - ellipsis.node().getComputedTextLength();
-            var numWords = words.length;
-            
-            var tspan = text.insert("tspan", ":first-child").text(words.join(" "));
-            
-            // Try the whole line
-            // While it's too long, and we have words left, keep removing words
-            while (tspan.node().getComputedTextLength() > width && words.length) {
-                words.pop();
-                tspan.text(words.join(" "));
-            }
-            
-            if (words.length === numWords) {
-                ellipsis.remove();
-            }
-        });
+    onload() {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("block-language-json");
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("viewBox", "0 0 400 500");
+        svg.setAttribute("name", "enhancedtreemap");
+        svg.classList.add("enhancedtreemap");
+
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+        const radialGradient = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
+        radialGradient.setAttribute("id", "radialgradient");
+        radialGradient.setAttribute("cx", "25%");
+        radialGradient.setAttribute("cy", "25%");
+        radialGradient.setAttribute("r", "100%");
+
+        const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop1.setAttribute("offset", "0%");
+        stop1.setAttribute("stop-color", "hsla(0, 0%, 80%, 10%)");
+        const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop2.setAttribute("offset", "100%");
+        stop2.setAttribute("stop-color", "hsla(0, 0%, 20%, 10%)");
+        radialGradient.appendChild(stop1);
+        radialGradient.appendChild(stop2);
+        defs.appendChild(radialGradient);
+        svg.appendChild(defs);
+
+        const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+        filter.setAttribute("id", "shadow");
+        filter.setAttribute("color-interpolation-filters", "sRGB");
+
+        const feDropShadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
+        feDropShadow.setAttribute("dx", "2");
+        feDropShadow.setAttribute("dy", "2");
+        feDropShadow.setAttribute("stdDeviation", "3");
+        feDropShadow.setAttribute("flood-opacity", "0.5");
+        filter.appendChild(feDropShadow);
+        svg.append(filter);
+        wrapper.append(svg);
+        this.containerEl.parentElement.replaceWith(wrapper);
     }
-
-    // load json data into hierarchy of nodes
-    // the ||!d.children adds a default value of 1 for any leaf nodes (no children) with no value
-    var nodes = d3.hierarchy(data).sum(function(d) { return d.value||!d.children; });
-
-    var svg = d3.select(".active-enhancedtreemap .enhancedtreemap").append("g");
-
-    var padding = 4;
-    var fontsize = 8;
-
-    // add positions to the nodes using the treemap layout
-    var treemapLayout = d3.treemap().size([400, 500]).paddingOuter(padding).paddingTop(fontsize + 2.5 * padding).paddingInner(padding)(nodes);
-
-    // decendants instead of leaves shows all nodes, not just the leaves
-    svg.selectAll("rect").data(nodes.descendants()).enter()
-        .append("rect")
-            .attr("x", function(d) { return d.x0; })
-            .attr("y", function(d) { return d.y0; })
-            .attr("width", function(d) { return d.x1 - d.x0; })
-            .attr("height", function(d) { return d.y1 - d.y0; })
-            .attr("stroke", "hsla(0, 0%, 0%, 50%)")
-            .attr("fill", function(d) { 
-                return d.data.fillhsl == null ? d3.hsl(0, 0, 0.25) : d3.hsl(
-                    d.data.fillhsl.h == null ? 0 : d.data.fillhsl.h, 
-                    d.data.fillhsl.s == null ? 0 : d.data.fillhsl.s, 
-                    d.data.fillhsl.l == null ? 0.25 : d.data.fillhsl.l)})
-            .attr("filter", "url(#shadow)");
-
-    svg.selectAll("highlight").data(nodes.descendants()).enter()
-        .append("rect")
-            .attr("x", function(d) { return d.x0; })
-            .attr("y", function(d) { return d.y0; })
-            .attr("width", function(d) { return d.x1 - d.x0; })
-            .attr("height", function(d) { return d.y1 - d.y0; })
-            .attr("fill", "url(#radialgradient)");
-
-    function textsize(d, fontsize) { return d.data.textsize == null ? fontsize : d.data.textsize; }
-
-    svg.selectAll("text").data(nodes.leaves()).enter()
-        .append("text")
-            .attr("x", function(d) { return d.x0 + 0.5 * (d.x1 - d.x0); })
-            .attr("y", function(d) { return d.y0 + 0.5 * (d.y1 - d.y0) + 0.25 * textsize(d, fontsize) })
-            .attr("left", function(d) { return d.x0; })
-            .attr("top", function(d) { return d.y0; })
-            .attr("width", function(d) { return d.x1 - d.x0 - 2 * padding; })
-            .attr("height", function(d) { return d.y1 - d.y0 - 2 * padding; })
-            .attr("text-anchor", "middle")
-            .attr("font-size", function(d) { return textsize(d, fontsize) + "px" })
-            .attr("fill", function(d) { 
-                return d.data.texthsl == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
-                    d.data.texthsl.h == null ? 0 : d.data.texthsl.h, 
-                    d.data.texthsl.s == null ? 0 : d.data.texthsl.s, 
-                    d.data.texthsl.l == null ? 0.8 : d.data.texthsl.l)})
-            .attr("opacity", function(d) { 
-                return ((d.y1 - d.y0 < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
-            .text(function(d) { return d.data.name; })
-            .call(wrap);
-
-    // label instead of text otherwise it doesn't work
-    // use the filter at the end otherwise the previous one doesn't work
-    svg.selectAll("label").data(nodes.descendants().filter(function(d) { return d.children; })).enter()
-        .append("text")
-            .attr("x", function(d) { return d.x0 + 0.5 * (d.x1 - d.x0); })
-            .attr("y", function(d) { return d.y0 + padding + textsize(d, fontsize) })
-            .attr("width", function(d) { return d.x1 - d.x0 - 2 * padding; })
-            .attr("text-anchor", "middle")
-            .attr("font-size", function(d) { return textsize(d, fontsize) + "px" })
-            //.attr("font-weight", "bold")
-            .attr("fill", function(d) { 
-                return d.data.texthsl == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
-                    d.data.texthsl.h == null ? 0 : d.data.texthsl.h, 
-                    d.data.texthsl.s == null ? 0 : d.data.texthsl.s, 
-                    d.data.texthsl.l == null ? 0.8 : d.data.texthsl.l)})
-            .attr("opacity", function(d) { 
-                return ((fontsize + padding < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
-            .text(function(d) { return d.data.name; })
-            .call(ellipse);
-
-`;
-
-// https://github.com/stbowers/obsidian-codeblock-labels
+}
 
 export default class EnhancedTreemapPlugin extends Plugin {
 	settings: EnhancedTreemapSettings;
 
-    postprocessor = async (content: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+    newpostprocessor = async (element: HTMLElement, context: MarkdownPostProcessorContext) => {
+        const codeblocks = element.querySelectorAll("code");
+
+        for (let index = 0; index < codeblocks.length; index++) {
+            const codeblock = codeblocks.item(index);
+            const alltext = context.getSectionInfo(codeblock).text;
+            if (alltext.match("```json\n\"type\": \"enhancedtreemap\",")) {
+
+                // add class to parent element so d3.selectAll can find the right svgs to update
+                element.classList.add('active-enhancedtreemap');
+
+                const innertext = codeblock.innerText.trim();
+
+                // the await is needed otherwise the globalEval may run too soon
+                await context.addChild(new EnhancedTreeMap(codeblock, innertext));
+
+                globalEval('data = {' + innertext + '};\n' + d3Template());
+
+                // remove class from parent element when done
+                element.classList.remove('active-enhancedtreemap');
+            }
+        }
+    }
+
+    oldpostprocessor = async (content: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
         // add class to parent element so d3.selectAll can find the right svgs to update
         el.classList.add('active-enhancedtreemap');
 
@@ -270,7 +130,7 @@ export default class EnhancedTreemapPlugin extends Plugin {
             </svg>`;
         await el.insertAdjacentHTML("beforeend", svg);
 
-        globalEval('data = {' + content + '};\n' + d3Template);
+        globalEval('data = {' + content + '};\n' + d3Template());
 
         // https://forum.obsidian.md/t/svg-gradient-rendered-differently-in-live-preview-vs-preview/31593/7
         // markdown-source-view & markdown-reading-view
@@ -316,7 +176,8 @@ export default class EnhancedTreemapPlugin extends Plugin {
         }
         //const head = document.querySelector("head");
         //head.insertAdjacentHTML("beforeend", '<script src="https://d3js.org/d3.v7.min.js"></script>');
-        this.registerMarkdownCodeBlockProcessor('enhancedtreemap', this.postprocessor);
+        //this.registerMarkdownCodeBlockProcessor('json', this.oldpostprocessor);
+        this.registerMarkdownPostProcessor((el, ctx) => this.newpostprocessor(el, ctx));
 
         /*
 		// This creates an icon in the left ribbon.
