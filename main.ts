@@ -188,7 +188,11 @@ var d3Template = `
             .attr("width", function(d) { return d.x1 - d.x0; })
             .attr("height", function(d) { return d.y1 - d.y0; })
             .attr("stroke", "hsla(0, 0%, 0%, 50%)")
-            .attr("fill", function(d) { return d3.hsl(d.data.h||0, d.data.s||0, d.data.l||0.25); })
+            .attr("fill", function(d) { 
+                return d.data.fillhsl == null ? d3.hsl(0, 0, 0.25) : d3.hsl(
+                    d.data.fillhsl.h == null ? 0 : d.data.fillhsl.h, 
+                    d.data.fillhsl.s == null ? 0 : d.data.fillhsl.s, 
+                    d.data.fillhsl.l == null ? 0.25 : d.data.fillhsl.l)})
             .attr("filter", "url(#shadow)");
 
     svg.selectAll("highlight").data(nodes.descendants()).enter()
@@ -199,18 +203,25 @@ var d3Template = `
             .attr("height", function(d) { return d.y1 - d.y0; })
             .attr("fill", "url(#radialgradient)");
 
+    function textsize(d, fontsize) { return d.data.textsize == null ? fontsize : d.data.textsize; }
+
     svg.selectAll("text").data(nodes.leaves()).enter()
         .append("text")
             .attr("x", function(d) { return d.x0 + 0.5 * (d.x1 - d.x0); })
-            .attr("y", function(d) { return d.y0 + 0.5 * (d.y1 - d.y0) + 0.25 * fontsize; })
+            .attr("y", function(d) { return d.y0 + 0.5 * (d.y1 - d.y0) + 0.25 * textsize(d, fontsize) })
             .attr("left", function(d) { return d.x0; })
             .attr("top", function(d) { return d.y0; })
             .attr("width", function(d) { return d.x1 - d.x0 - 2 * padding; })
             .attr("height", function(d) { return d.y1 - d.y0 - 2 * padding; })
             .attr("text-anchor", "middle")
-            .attr("font-size", fontsize + "px")
-            .attr("fill", "rgb(224, 224, 224)")
-            .attr("opacity", function(d) { return (d.y1 - d.y0 < fontsize) || (d.x1 - d.x0 < fontsize) ? 0 : 1})
+            .attr("font-size", function(d) { return textsize(d, fontsize) + "px" })
+            .attr("fill", function(d) { 
+                return d.data.texthsl == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
+                    d.data.texthsl.h == null ? 0 : d.data.texthsl.h, 
+                    d.data.texthsl.s == null ? 0 : d.data.texthsl.s, 
+                    d.data.texthsl.l == null ? 0.8 : d.data.texthsl.l)})
+            .attr("opacity", function(d) { 
+                return ((d.y1 - d.y0 < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
             .text(function(d) { return d.data.name; })
             .call(wrap);
 
@@ -219,12 +230,18 @@ var d3Template = `
     svg.selectAll("label").data(nodes.descendants().filter(function(d) { return d.children; })).enter()
         .append("text")
             .attr("x", function(d) { return d.x0 + 0.5 * (d.x1 - d.x0); })
-            .attr("y", function(d) { return d.y0 + fontsize + padding; })
+            .attr("y", function(d) { return d.y0 + padding + textsize(d, fontsize) })
             .attr("width", function(d) { return d.x1 - d.x0 - 2 * padding; })
             .attr("text-anchor", "middle")
-            .attr("font-size", fontsize + "px")
+            .attr("font-size", function(d) { return textsize(d, fontsize) + "px" })
             //.attr("font-weight", "bold")
-            .attr("fill", "rgb(224, 224, 224)")
+            .attr("fill", function(d) { 
+                return d.data.texthsl == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
+                    d.data.texthsl.h == null ? 0 : d.data.texthsl.h, 
+                    d.data.texthsl.s == null ? 0 : d.data.texthsl.s, 
+                    d.data.texthsl.l == null ? 0.8 : d.data.texthsl.l)})
+            .attr("opacity", function(d) { 
+                return ((fontsize + padding < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
             .text(function(d) { return d.data.name; })
             .call(ellipse);
 
