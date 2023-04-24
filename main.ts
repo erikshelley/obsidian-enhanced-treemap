@@ -64,7 +64,7 @@ var d3Template = `
                 if ((lineNumber + 2) * lineHeight * fontsize >= height) {
                     tspan.text("...");
                 }
-                else if (tspan.node().getComputedTextLength() > width) {
+                if (tspan.node().getComputedTextLength() > width) {
                     line.pop();
                     tspan.text(line.join(" "));
 
@@ -77,7 +77,7 @@ var d3Template = `
                             tspan.text(longline.substring(0, longline.length/splits) + "-");
                         }
                         for (i=2; i<=splits; i++) {
-                            if ((lineNumber + 2) * lineHeight * fontsize >= height) {
+                            if ((lineNumber + 1) * lineHeight * fontsize >= height) {
                                 tspan.text("...");
                             }
                             else {
@@ -91,6 +91,9 @@ var d3Template = `
                     }
 
                     line = [word];
+                    if ((lineNumber + 1) * lineHeight * fontsize >= height) {
+                        tspan.text("...");
+                    }
                     tspan = text.append("tspan")
                                 .attr("x", x)
                                 .attr("y", y)
@@ -106,7 +109,7 @@ var d3Template = `
                             tspan.text(longline.substring(0, longline.length/splits) + "-");
                         }
                         for (i=2; i<=splits; i++) {
-                            if ((lineNumber + 2) * lineHeight * fontsize >= height) {
+                            if ((lineNumber + 1) * lineHeight * fontsize >= height) {
                                 tspan.text("...");
                             }
                             else {
@@ -207,6 +210,7 @@ var d3Template = `
             .attr("text-anchor", "middle")
             .attr("font-size", fontsize + "px")
             .attr("fill", "rgb(224, 224, 224)")
+            .attr("opacity", function(d) { return (d.y1 - d.y0 < fontsize) || (d.x1 - d.x0 < fontsize) ? 0 : 1})
             .text(function(d) { return d.data.name; })
             .call(wrap);
 
