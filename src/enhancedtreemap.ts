@@ -1,5 +1,6 @@
 import { MarkdownRenderChild } from 'obsidian';
-import * as d3 from './d3.min.js';
+import * as d3 from 'd3';
+//import * as d3 from './d3.min.js';
 
 export default class EnhancedTreeMap {
     plugin: ChartPlugin;

@@ -14,7 +14,14 @@ export default class EnhancedTreemapPlugin extends Plugin {
     enhancedtreemap: EnhancedTreeMap;
 
     postprocessor = async (element: HTMLElement, context: MarkdownPostProcessorContext) => {
-        await this.enhancedtreemap.renderEnhancedTreeMap(element, context);
+        // only create the tree if there is a code block containing the expected text
+        var codeblock = element.querySelector("code");
+        if (codeblock == null) return;
+
+        var data = codeblock.textContent;
+        if (data.match(/"type": "enhancedtreemap"/)) {
+            await this.enhancedtreemap.renderEnhancedTreeMap(element, context);
+        }
     }
 
 	async onload() {
@@ -29,12 +36,12 @@ export default class EnhancedTreemapPlugin extends Plugin {
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
+		//this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
+		//	console.log('click', evt);
+		//});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		//this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
 	onunload() {
