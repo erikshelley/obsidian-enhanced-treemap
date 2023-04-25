@@ -46,7 +46,7 @@ export class EnhancedTreeMap extends MarkdownRenderChild {
 
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("width", "100%");
-        svg.setAttribute("viewBox", "0 0 400 500");
+        svg.setAttribute("viewBox", "0 0 400 250");
         svg.setAttribute("name", "enhancedtreemap");
         svg.classList.add("enhancedtreemap");
 
@@ -117,7 +117,7 @@ export default class EnhancedTreemapPlugin extends Plugin {
         el.classList.add('active-enhancedtreemap');
 
         const svg = `
-            <svg width="100%" viewbox="0 0 400 500" class="enhancedtreemap" name="enhancedtreemap">
+            <svg width="100%" viewbox="0 0 400 250" class="enhancedtreemap" name="enhancedtreemap">
                 <defs>
                     <radialGradient id="radialgradient" cx="25%" cy="25%" r="100%">
                         <stop offset="0%" stop-color="hsla(0, 0%, 80%, 10%)"/>

@@ -6,87 +6,97 @@ export function d3Template() {
                 words = text.text().split(/\\s+/).reverse(),
                 word,
                 longline,
-                splits,
+                fraction,
                 i,
                 line = [],
                 lineNumber = 0,
                 lineHeight = 1.1, // ems
+                overflow = false,
                 x = text.attr("x"),
                 y = text.attr("y"),
-                //width = text.attr("width"),
                 width = parseFloat(text.attr("width")),
                 height = parseFloat(text.attr("height")),
                 fontsize = parseFloat(text.attr("font-size").substring(0, text.attr("font-size").length - 2)),
-                dy = 0, //parseFloat(text.attr("dy")),
+                dy = 0, 
                 tspan = text.text(null)
                             .append("tspan")
                             .attr("x", x)
                             .attr("y", y)
                             .attr("dy", dy + "em");
             while (word = words.pop()) {
+                // add a word to the line
                 line.push(word);
-                tspan.text(line.join(" "));
-                if ((lineNumber + 2) * lineHeight * fontsize >= height) {
-                    tspan.text("...");
-                }
-                if (tspan.node().getComputedTextLength() > width) {
-                    line.pop();
+                
+                // only update the text if we haven't already exceeded the max rows that will fit
+                if (lineNumber * lineHeight * fontsize <= height) {
                     tspan.text(line.join(" "));
 
-                    // if a single word is too long, break it in half
-                    if (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
-                        longline = tspan.text();
-                        splits = 1;
-                        while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
-                            splits++;
-                            tspan.text(longline.substring(0, longline.length/splits) + "-");
-                        }
-                        for (i=2; i<=splits; i++) {
-                            if ((lineNumber + 1) * lineHeight * fontsize >= height) {
-                                tspan.text("...");
-                            }
-                            else {
-                                tspan = text.append("tspan")
-                                            .attr("x", x)
-                                            .attr("y", y)
-                                            .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                                            .text(longline.substring((i - 1) * longline.length / splits, i * longline.length / splits) + (i < splits ? "-" : ""));
-                            }
-                        }
-                    }
+                    // if the line is now too long to fit then remove the last added word
+                    if (tspan.node().getComputedTextLength() > width) {
+                        // remove the word that made it too long
+                        line.pop();
+                        tspan.text(line.join(" "));
 
-                    line = [word];
-                    if ((lineNumber + 1) * lineHeight * fontsize >= height) {
-                        tspan.text("...");
-                    }
-                    tspan = text.append("tspan")
-                                .attr("x", x)
-                                .attr("y", y)
-                                .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                                .text(word);
+                        // if a single word is too long to fit, break it apart
+                        if (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
+                            longline = tspan.text();
 
-                    // if last word is too long, break it in half
-                    if (words.length == 0 && tspan.node().getComputedTextLength() > width) {
-                        longline = tspan.text();
-                        splits = 1;
-                        while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
-                            splits++;
-                            tspan.text(longline.substring(0, longline.length/splits) + "-");
-                        }
-                        for (i=2; i<=splits; i++) {
-                            if ((lineNumber + 1) * lineHeight * fontsize >= height) {
-                                tspan.text("...");
+                            // find the largest fraction of the word that will fit
+                            fraction = 1;
+                            while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
+                                fraction++;
+                                tspan.text(longline.substring(0, longline.length/fraction) + "-");
                             }
-                            else {
-                                tspan = text.append("tspan")
-                                            .attr("x", x)
-                                            .attr("y", y)
-                                            .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                                            .text(longline.substring((i - 1) * longline.length / splits, i * longline.length / splits) + (i < splits ? "-" : ""));
+
+                            // create tspans for the remaining fractions of the word
+                            for (i=2; i<=fraction; i++) {
+                                // add tspan if there is room
+                                if ((lineNumber + 1) * lineHeight * fontsize <= height) {
+                                    tspan = text.append("tspan")
+                                                .attr("x", x)
+                                                .attr("y", y)
+                                                .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                                                .text(longline.substring((i - 1) * longline.length / fraction, i * longline.length / fraction) + (i < fraction ? "-" : ""));
+                                }
+                                else { overflow = true; }
                             }
                         }
+
+                        // create a new line using the removed word
+                        if ((lineNumber + 1) * lineHeight * fontsize <= height) {
+                            line = [word];
+                            tspan = text.append("tspan")
+                                        .attr("x", x)
+                                        .attr("y", y)
+                                        .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                                        .text(word);
+                            
+                            // if last word is too long, break it apart
+                            if (words.length == 0 && tspan.node().getComputedTextLength() > width) {
+                                longline = tspan.text();
+                                fraction = 1;
+                                while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
+                                    fraction++;
+                                    tspan.text(longline.substring(0, longline.length/fraction) + "-");
+                                }
+                                for (i=2; i<=fraction; i++) {
+                                    if ((lineNumber + 1) * lineHeight * fontsize <= height) {
+                                        tspan = text.append("tspan")
+                                                    .attr("x", x)
+                                                    .attr("y", y)
+                                                    .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                                                    .text(longline.substring((i - 1) * longline.length / fraction, i * longline.length / fraction) + (i < fraction ? "-" : ""));
+                                    }
+                                    else { overflow = true; }
+                                }
+                            }
+                        }
+                        else { overflow = true; }
                     }
                 }
+            }
+            if (overflow == true) {
+                tspan.text(tspan.text() + "...");
             }
             if (lineNumber > 0) {
                 const startDy = -(lineNumber * (lineHeight / 2));
@@ -140,10 +150,10 @@ export function d3Template() {
     var svg = d3.select(".active-enhancedtreemap .enhancedtreemap").append("g");
 
     var padding = 4;
-    var fontsize = 8;
+    var fontsize = 4;
 
     // add positions to the nodes using the treemap layout
-    var treemapLayout = d3.treemap().size([400, 500]).paddingOuter(padding).paddingTop(fontsize + 2.5 * padding).paddingInner(padding)(nodes);
+    var treemapLayout = d3.treemap().size([400, 250]).paddingOuter(padding).paddingTop(fontsize + 2.5 * padding).paddingInner(padding)(nodes);
 
     // decendants instead of leaves shows all nodes, not just the leaves
     svg.selectAll("rect").data(nodes.descendants()).enter()
@@ -154,10 +164,10 @@ export function d3Template() {
             .attr("height", function(d) { return d.y1 - d.y0; })
             .attr("stroke", "hsla(0, 0%, 0%, 50%)")
             .attr("fill", function(d) { 
-                return d.data.fillhsl == null ? d3.hsl(0, 0, 0.25) : d3.hsl(
-                    d.data.fillhsl.h == null ? 0 : d.data.fillhsl.h, 
-                    d.data.fillhsl.s == null ? 0 : d.data.fillhsl.s, 
-                    d.data.fillhsl.l == null ? 0.25 : d.data.fillhsl.l)})
+                return d.data.fill == null ? d3.hsl(0, 0, 0.25) : d3.hsl(
+                    d.data.fill.h == null ? 0 : d.data.fill.h, 
+                    d.data.fill.s == null ? 0 : d.data.fill.s, 
+                    d.data.fill.l == null ? 0.25 : d.data.fill.l)})
             .attr("filter", "url(#shadow)");
 
     svg.selectAll("highlight").data(nodes.descendants()).enter()
@@ -168,7 +178,7 @@ export function d3Template() {
             .attr("height", function(d) { return d.y1 - d.y0; })
             .attr("fill", "url(#radialgradient)");
 
-    function textsize(d, fontsize) { return d.data.textsize == null ? fontsize : d.data.textsize; }
+    function textsize(d, fontsize) { return d.data.text_size == null ? fontsize : d.data.text_size; }
 
     svg.selectAll("text").data(nodes.leaves()).enter()
         .append("text")
@@ -181,10 +191,10 @@ export function d3Template() {
             .attr("text-anchor", "middle")
             .attr("font-size", function(d) { return textsize(d, fontsize) + "px" })
             .attr("fill", function(d) { 
-                return d.data.texthsl == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
-                    d.data.texthsl.h == null ? 0 : d.data.texthsl.h, 
-                    d.data.texthsl.s == null ? 0 : d.data.texthsl.s, 
-                    d.data.texthsl.l == null ? 0.8 : d.data.texthsl.l)})
+                return d.data.text_color == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
+                    d.data.text_color.h == null ? 0 : d.data.text_color.h, 
+                    d.data.text_color.s == null ? 0 : d.data.text_color.s, 
+                    d.data.text_color.l == null ? 0.8 : d.data.text_color.l)})
             .attr("opacity", function(d) { 
                 return ((d.y1 - d.y0 < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
             .text(function(d) { return d.data.name; })
@@ -201,10 +211,10 @@ export function d3Template() {
             .attr("font-size", function(d) { return textsize(d, fontsize) + "px" })
             //.attr("font-weight", "bold")
             .attr("fill", function(d) { 
-                return d.data.texthsl == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
-                    d.data.texthsl.h == null ? 0 : d.data.texthsl.h, 
-                    d.data.texthsl.s == null ? 0 : d.data.texthsl.s, 
-                    d.data.texthsl.l == null ? 0.8 : d.data.texthsl.l)})
+                return d.data.text_color == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
+                    d.data.text_color.h == null ? 0 : d.data.text_color.h, 
+                    d.data.text_color.s == null ? 0 : d.data.text_color.s, 
+                    d.data.text_color.l == null ? 0.8 : d.data.text_color.l)})
             .attr("opacity", function(d) { 
                 return ((fontsize + padding < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
             .text(function(d) { return d.data.name; })
