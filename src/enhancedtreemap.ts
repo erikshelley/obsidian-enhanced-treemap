@@ -56,6 +56,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     svg_height: float;
     fixed_width: float;
     header_size: float;
+    shadow_size: float;
     show_headers: bool;
     header_alignment: string;
     vertical_alignment: string;
@@ -69,6 +70,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.svg_id = "enhancedtreemap";
         this.svg_width = 10;
         this.svg_height = 10;
+        this.padding = 4;
         this.ctx = ctx;
         this.sort = true;
         this.error = false;
@@ -83,7 +85,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.aspect = 1;
         this.shading = true;
         this.shadows = true;
-        this.padding = 4;
+        this.shadow_size = this.padding / 2;
         this.fixed_width = null;
         this.header_h = this.text_h;
         this.header_s = this.text_s;
@@ -94,7 +96,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.border_l = 0;
         this.border_a = 0.5;
         this.text_size = 12;
-        this.header_size = this.text_size;
+        this.header_size = 16;
         this.show_headers = true;
         this.header_alignment = "center";
         this.vertical_alignment = "center";
@@ -105,62 +107,88 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         try {
             this.data = JSON.parse(this.element.querySelector("code").textContent);
             this.parseOptions();
-            var parentDiv = this.element.querySelector("pre");
-            parentDiv.replaceWith(this.emptySVG());
-            this.svg = this.element.querySelector("svg");
+            if (!this.error) {
+                var parentDiv = this.element.querySelector("pre");
+                parentDiv.replaceWith(this.emptySVG());
+                this.svg = this.element.querySelector("svg");
+            }
         } catch(e) {
-            this.error = true;
-            const wrapper = document.createElement("div");
-            wrapper.textContent = e;
-            var parentDiv = this.element.querySelector("pre");
-            parentDiv.replaceWith(wrapper);
+            this.handleError(e);
         }
+    }
+
+    handleError(message) {
+        this.error = true;
+        const wrapper = document.createElement("div");
+        wrapper.textContent = message;
+        wrapper.setAttribute("style", "color: red");
+        var parentDiv = this.element.querySelector("pre");
+        parentDiv.replaceWith(wrapper);
+    }
+
+    verifyOption(value, option, type) {
+        if (type == "float") {
+            var output = parseFloat(value);
+            if (Number.isNaN(output)) this.handleError(option + " must be a number!");
+            return output;
+        }
+        if (type == "bool") {
+            if (typeof value != "boolean") this.handleError(option + " must be true or false (no quotes)!");
+            return value;
+        }
+        return value;
     }
 
     parseOptions() {
         var options = this.data.options;
         if (options) {
             options.forEach(option => {
-                if (option.text_size != null) this.text_size = option.text_size;
+                if (option.text_size != null) { this.text_size = this.verifyOption(option.text_size, "text_size", "float"); }
                 if (option.text_color != null) {
-                    if (option.text_color.h != null) this.text_h = option.text_color.h;
-                    if (option.text_color.s != null) this.text_s = option.text_color.s;
-                    if (option.text_color.l != null) this.text_l = option.text_color.l;
-                    if (option.text_color.a != null) this.text_a = option.text_color.a;
+                    if (option.text_color.h != null) this.text_h = this.verifyOption(option.text_color.h, "text_color h", "float");
+                    if (option.text_color.s != null) this.text_s = this.verifyOption(option.text_color.s, "text_color s", "float");
+                    if (option.text_color.l != null) this.text_l = this.verifyOption(option.text_color.l, "text_color l", "float");
+                    if (option.text_color.a != null) this.text_a = this.verifyOption(option.text_color.a, "text_color a", "float");
                 }
                 if (option.fill != null) {
-                    if (option.fill.h != null) this.fill_h = option.fill.h;
-                    if (option.fill.s != null) this.fill_s = option.fill.s;
-                    if (option.fill.l != null) this.fill_l = option.fill.l;
-                    if (option.fill.a != null) this.fill_a = option.fill.a;
+                    if (option.fill.h != null) this.fill_h = this.verifyOption(option.fill.h, "fill h", "float");
+                    if (option.fill.s != null) this.fill_s = this.verifyOption(option.fill.s, "fill s", "float");
+                    if (option.fill.l != null) this.fill_l = this.verifyOption(option.fill.l, "fill l", "float");
+                    if (option.fill.a != null) this.fill_a = this.verifyOption(option.fill.a, "fill a", "float");
                 }
-                if (option.shading != null) this.shading = option.shading;
-                if (option.shadows != null) this.shadows = option.shadows;
-                if (option.header_size != null) this.header_size = option.header_size;
+                if (option.shading != null) this.shading = this.verifyOption(option.shading, "shading", "bool");
+                if (option.shadows != null) this.shadows = this.verifyOption(option.shadows, "shadows", "bool");
+                if (option.shadow_size != null) this.shadow_size = this.verifyOption(option.shadow_size, "shadow_size", "float");
+                if (option.header_size != null) this.header_size = this.verifyOption(option.header_size, "header_size", "float");
                 if (option.header_color != null) {
-                    if (option.header_color.h != null) this.header_h = option.header_color.h;
-                    if (option.header_color.s != null) this.header_s = option.header_color.s;
-                    if (option.header_color.l != null) this.header_l = option.header_color.l;
-                    if (option.header_color.a != null) this.header_a = option.header_color.a;
+                    if (option.header_color.h != null) this.header_h = this.verifyOption(option.header_color.h, "header h", "float");
+                    if (option.header_color.s != null) this.header_s = this.verifyOption(option.header_color.s, "header s", "float");
+                    if (option.header_color.l != null) this.header_l = this.verifyOption(option.header_color.l, "header l", "float");
+                    if (option.header_color.a != null) this.header_a = this.verifyOption(option.header_color.a, "header a", "float");
                 }
                 if (option.border_color != null) {
-                    if (option.border_color.h != null) this.border_h = option.border_color.h;
-                    if (option.border_color.s != null) this.border_s = option.border_color.s;
-                    if (option.border_color.l != null) this.border_l = option.border_color.l;
-                    if (option.border_color.a != null) this.border_a = option.border_color.a;
+                    if (option.border_color.h != null) this.border_h = this.verifyOption(option.border_color.h, "border h", "float");
+                    if (option.border_color.s != null) this.border_s = this.verifyOption(option.border_color.s, "border s", "float");
+                    if (option.border_color.l != null) this.border_l = this.verifyOption(option.border_color.l, "border l", "float");
+                    if (option.border_color.a != null) this.border_a = this.verifyOption(option.border_color.a, "border a", "float");
                 }
-                if (option.show_headers != null) this.show_headers = option.show_headers;
+
+                if (option.show_headers != null) this.show_headers = this.verifyOption(option.show_headers, "show_headers", "bool");
                 if (this.show_headers == false) this.header_size = 0;
-                if (option.padding != null) this.padding = option.padding;
-                if (option.aspect != null) {
-                    var ratio = option.aspect.split(":");
-                    this.aspect = ratio[0] / ratio[1];
+
+                if (option.padding != null) this.padding = this.verifyOption(option.padding, "padding", "float");
+
+                if (option.aspect_ratio != null) {
+                    var ratio = option.aspect_ratio.split(":");
+                    if (ratio[0] == 0 || ratio[1] == 0) this.handleError("aspect_ratio cannot include any zeros");
+                    else this.aspect = ratio[0] / ratio[1];
                 }
+
                 if (option.vertical_alignment != null) this.vertical_alignment = option.vertical_alignment;
                 if (option.horizontal_alignment != null) this.horizontal_alignment = option.horizontal_alignment;
                 if (option.header_alignment != null) this.header_alignment = option.header_alignment;
-                if (option.width != null) this.fixed_width = option.width;
-                if (option.sort != null) this.sort = option.sort;
+                if (option.width != null) this.fixed_width = this.verifyOption(option.width, "width", "float");
+                if (option.sort != null) this.sort = this.verifyOption(option.sort, "sort", "bool");
             });
         }
     }
@@ -173,9 +201,18 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         const svg_id = "enhancedtreemap_" + Math.floor(Math.random() * 100000);
         this.svg_id = svg_id;
         svg.setAttribute("id", svg_id);
-        if (this.fixed_width == null) { svg.setAttribute("width", "100%"); }
-        else { svg.setAttribute("width", this.fixed_width); }
-        svg.setAttribute("viewBox", "0 0 " + this.svg_width + " " + this.svg_height);
+
+        if (this.fixed_width == null) { 
+            svg.setAttribute("width", "100%"); 
+            svg.setAttribute("viewBox", "0 0 " + this.svg_width + " " + this.svg_height);
+        }
+        else { 
+            this.svg_width = this.fixed_width;
+            this.svg_height = this.fixed_width / this.aspect;
+            svg.setAttribute("width", this.svg_width); 
+            svg.setAttribute("height", this.svg_height)
+        }
+
         svg.setAttribute("name", "enhancedtreemap");
         svg.classList.add("enhancedtreemap");
 
@@ -203,8 +240,8 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         filter.setAttribute("color-interpolation-filters", "sRGB");
 
         const feDropShadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
-        feDropShadow.setAttribute("dx", "2");
-        feDropShadow.setAttribute("dy", "2");
+        feDropShadow.setAttribute("dx", this.shadow_size);
+        feDropShadow.setAttribute("dy", this.shadow_size);
         feDropShadow.setAttribute("stdDeviation", "3");
         feDropShadow.setAttribute("flood-opacity", "0.5");
         filter.appendChild(feDropShadow);
@@ -217,11 +254,17 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         if (this.error) return;
         var scale = this.aspect;
         var svg_element = document.getElementById(this.svg_id);
-        var width = svg_element.parentElement.offsetWidth * scale;
-        var height = svg_element.parentElement.offsetHeight;
+        var width = this.svg_width;
+        var height = this.svg_height;
+
+        if (!this.fixed_width) {
+            width = svg_element.parentElement.offsetWidth * scale;
+            height = svg_element.parentElement.offsetHeight;
+            svg_element.setAttribute("viewBox", "0 0 " + width + " " + height);
+        }
+
         var vertical_alignment = this.vertical_alignment; // this is needed to access them within wrap function
         var horizontal_alignment = this.horizontal_alignment; // this is needed to access them within wrap function
-        svg_element.setAttribute("viewBox", "0 0 " + width + " " + height);
 
         // load json data into hierarchy of nodes
         // the ||!d.children adds a default value of 1 for any leaf nodes with no value
@@ -241,6 +284,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
 
         // add positions to the nodes using the treemap layout
         var treemapLayout = d3.treemap()
+            .tile(d3.treemapSquarify.ratio(1))
             .size([width, height])
             .paddingOuter(padding)
             .paddingTop(this.show_headers ? header_size + 4 * padding : padding)
@@ -291,9 +335,9 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         if (d.data.horizontal_alignment == "right"  || (d.data.horizontal_alignment == null && this.horizontal_alignment == "right"))  return d.x1 - padding; 
                 })
                 .attr("y",           (d: any) => { 
-                    if (d.data.vertical_alignment == "left"   || (d.data.vertical_alignment == null && this.vertical_alignment == "top"))    return d.y0 + padding + textsize(d, scale, text_size);
+                    if (d.data.vertical_alignment == "top"   || (d.data.vertical_alignment == null && this.vertical_alignment == "top"))    return d.y0 + padding + textsize(d, scale, text_size);
                     if (d.data.vertical_alignment == "center" || (d.data.vertical_alignment == null && this.vertical_alignment == "center")) return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textsize(d, scale, text_size);
-                    if (d.data.vertical_alignment == "right"  || (d.data.vertical_alignment == null && this.vertical_alignment == "bottom")) return d.y1 - padding;
+                    if (d.data.vertical_alignment == "bottom"  || (d.data.vertical_alignment == null && this.vertical_alignment == "bottom")) return d.y1 - padding;
                 })
                 .attr("left",        (d: any) => { return d.x0; })
                 .attr("top",         (d: any) => { return d.y0; })
