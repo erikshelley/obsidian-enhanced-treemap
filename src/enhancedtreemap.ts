@@ -28,6 +28,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     ctx: string;
     data: string;
     sort: bool;
+    error: bool;
     element: HTMLElement;
     text_h: float;
     text_s: float;
@@ -70,6 +71,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.svg_height = 10;
         this.ctx = ctx;
         this.sort = true;
+        this.error = false;
         this.text_h = 0;
         this.text_s = 0;
         this.text_l = 0.8;
@@ -100,11 +102,19 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     }
 
     async onload() {
-        this.data = JSON.parse(this.element.querySelector("code").textContent);
-        this.parseOptions();
-        var parentDiv = this.element.querySelector("pre");
-        parentDiv.replaceWith(this.emptySVG());
-        this.svg = this.element.querySelector("svg");
+        try {
+            this.data = JSON.parse(this.element.querySelector("code").textContent);
+            this.parseOptions();
+            var parentDiv = this.element.querySelector("pre");
+            parentDiv.replaceWith(this.emptySVG());
+            this.svg = this.element.querySelector("svg");
+        } catch(e) {
+            this.error = true;
+            const wrapper = document.createElement("div");
+            wrapper.textContent = e;
+            var parentDiv = this.element.querySelector("pre");
+            parentDiv.replaceWith(wrapper);
+        }
     }
 
     parseOptions() {
@@ -204,6 +214,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     }
 
     renderEnhancedTreeMap() {
+        if (this.error) return;
         var scale = this.aspect;
         var svg_element = document.getElementById(this.svg_id);
         var width = svg_element.parentElement.offsetWidth * scale;
@@ -268,7 +279,8 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     .attr("y",      (d: any) => { return d.y0; })
                     .attr("width",  (d: any) => { return d.x1 - d.x0; })
                     .attr("height", (d: any) => { return d.y1 - d.y0; })
-                    .attr("fill",   "url(#radialgradient)");
+                    .attr("fill",   "url(#radialgradient)")
+                    .append("title").text((d: any) => { return d.data.name; });
         }
 
         svg.selectAll("text").data(nodes.leaves()).enter()
@@ -302,7 +314,8 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 })
                 .attr("opacity",     (d: any) => { return ((d.y1 - d.y0 < textsize(d, scale, text_size)) || (d.x1 - d.x0 < textsize(d, scale, text_size))) ? 0 : 1 })
                 .text((d: any) => { return d.data.name; })
-                .call(wrap);
+                .call(wrap)
+                .append("title").text((d: any) => { return d.data.name; });
 
         // label instead of text otherwise it doesn't work
         // use the filter at the end otherwise the previous one doesn't work
@@ -331,7 +344,8 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     })
                     .attr("opacity",     (d: any) => { return ((header_size + padding < textsize(d, scale, header_size)) || (d.x1 - d.x0 < textsize(d, scale, header_size))) ? 0 : 1 })
                     .text((d: any) => { return d.data.name; })
-                    .call(ellipse);
+                    .call(ellipse)
+                    .append("title").text((d: any) => { return d.data.name; });
         }
 
         function textsize(d, scale, fontsize) { 
