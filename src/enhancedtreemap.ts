@@ -1,6 +1,5 @@
 import { MarkdownRenderChild } from 'obsidian';
 import * as d3 from 'd3';
-//import * as d3 from './d3.min.js';
 
 export default class EnhancedTreeMap {
     plugin: ChartPlugin;
@@ -28,21 +27,129 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     svg: HTMLElement;
     ctx: string;
     data: string;
+    sort: bool;
     element: HTMLElement;
+    text_h: float;
+    text_s: float;
+    text_l: float;
+    text_a: float;
+    fill_h: float;
+    fill_s: float;
+    fill_l: float;
+    fill_a: float;
+    aspect: float;
+    svg_id: string;
+    shading: bool;
+    shadows: bool;
+    padding: float;
+    header_h: float;
+    header_s: float;
+    header_l: float;
+    header_a: float;
+    border_h: float;
+    border_s: float;
+    border_l: float;
+    border_a: float;
+    text_size: float;
+    svg_width: float;
+    svg_height: float;
+    fixed_width: float;
+    header_size: float;
+    show_headers: bool;
+    vertical_alignment: string;
+    horizontal_alignment: string;
     enhancedtreemap: EnhancedTreeMap;
 
     constructor(element: HTMLElement, enhancedtreemap: EnhancedTreeMap, ctx: MarkdownPostProcessorContext) {
         super(element);
         this.element = element;
         this.enhancedtreemap = enhancedtreemap;
+        this.svg_id = "enhancedtreemap";
+        this.svg_width = 10;
+        this.svg_height = 10;
         this.ctx = ctx;
+        this.sort = true;
+        this.text_h = 0;
+        this.text_s = 0;
+        this.text_l = 0.8;
+        this.text_a = 1;
+        this.fill_h = 0;
+        this.fill_s = 0;
+        this.fill_l = 0.25;
+        this.fill_a = 1;
+        this.aspect = 1;
+        this.shading = true;
+        this.shadows = true;
+        this.padding = 4;
+        this.fixed_width = null;
+        this.header_h = this.text_h;
+        this.header_s = this.text_s;
+        this.header_l = this.text_l;
+        this.header_a = this.text_a;
+        this.border_h = 0;
+        this.border_s = 0;
+        this.border_l = 0;
+        this.border_a = 0.5;
+        this.text_size = 12;
+        this.header_size = this.text_size;
+        this.show_headers = true;
+        this.vertical_alignment = "center";
+        this.horizontal_alignment = "center";
     }
 
     async onload() {
-        this.data = this.element.querySelector("code").textContent;
+        this.data = JSON.parse(this.element.querySelector("code").textContent);
+        this.parseOptions();
         var parentDiv = this.element.querySelector("pre");
         parentDiv.replaceWith(this.emptySVG());
         this.svg = this.element.querySelector("svg");
+    }
+
+    parseOptions() {
+        var options = this.data.options;
+        if (options) {
+            options.forEach(option => {
+                if (option.text_size != null) this.text_size = option.text_size;
+                if (option.text_color != null) {
+                    if (option.text_color.h != null) this.text_h = option.text_color.h;
+                    if (option.text_color.s != null) this.text_s = option.text_color.s;
+                    if (option.text_color.l != null) this.text_l = option.text_color.l;
+                    if (option.text_color.a != null) this.text_a = option.text_color.a;
+                }
+                if (option.fill != null) {
+                    if (option.fill.h != null) this.fill_h = option.fill.h;
+                    if (option.fill.s != null) this.fill_s = option.fill.s;
+                    if (option.fill.l != null) this.fill_l = option.fill.l;
+                    if (option.fill.a != null) this.fill_a = option.fill.a;
+                }
+                if (option.shading != null) this.shading = option.shading;
+                if (option.shadows != null) this.shadows = option.shadows;
+                if (option.header_size != null) this.header_size = option.header_size;
+                if (option.header_color != null) {
+                    if (option.header_color.h != null) this.header_h = option.header_color.h;
+                    if (option.header_color.s != null) this.header_s = option.header_color.s;
+                    if (option.header_color.l != null) this.header_l = option.header_color.l;
+                    if (option.header_color.a != null) this.header_a = option.header_color.a;
+                }
+                if (option.border_color != null) {
+                    if (option.border_color.h != null) this.border_h = option.border_color.h;
+                    if (option.border_color.s != null) this.border_s = option.border_color.s;
+                    if (option.border_color.l != null) this.border_l = option.border_color.l;
+                    if (option.border_color.a != null) this.border_a = option.border_color.a;
+                }
+                if (option.show_headers != null) this.show_headers = option.show_headers;
+                if (this.show_headers == false) this.header_size = 0;
+                if (option.padding != null) this.padding = option.padding;
+                if (option.aspect != null) {
+                    var ratio = option.aspect.split(":");
+                    this.aspect = ratio[0] / ratio[1];
+                }
+                if (option.vertical_alignment != null) this.vertical_alignment = option.vertical_alignment;
+                if (option.horizontal_alignment != null) this.horizontal_alignment = option.horizontal_alignment;
+                if (option.width != null) this.fixed_width = option.width;
+                if (option.sort != null) this.sort = option.sort;
+            });
+        }
     }
 
     emptySVG() {
@@ -50,8 +157,12 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         wrapper.classList.add("block-language-json");
 
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("viewBox", "0 0 400 250");
+        const svg_id = "enhancedtreemap_" + Math.floor(Math.random() * 100000);
+        this.svg_id = svg_id;
+        svg.setAttribute("id", svg_id);
+        if (this.fixed_width == null) { svg.setAttribute("width", "100%"); }
+        else { svg.setAttribute("width", this.fixed_width); }
+        svg.setAttribute("viewBox", "0 0 " + this.svg_width + " " + this.svg_height);
         svg.setAttribute("name", "enhancedtreemap");
         svg.classList.add("enhancedtreemap");
 
@@ -90,25 +201,35 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     }
 
     renderEnhancedTreeMap() {
-        var data = this.data;
-        var svgElement = this.svg;
+        var scale = this.aspect;
+        var svg_element = document.getElementById(this.svg_id);
+        var width = svg_element.parentElement.offsetWidth * scale;
+        var height = svg_element.parentElement.offsetHeight;
+        var vertical_alignment = this.vertical_alignment; // this is needed to access them within wrap function
+        var horizontal_alignment = this.horizontal_alignment; // this is needed to access them within wrap function
+        svg_element.setAttribute("viewBox", "0 0 " + width + " " + height);
 
         // load json data into hierarchy of nodes
         // the ||!d.children adds a default value of 1 for any leaf nodes with no value
-        var nodes = d3.hierarchy(JSON.parse(data))
-            .sum((d: any) => { return d.value||!d.children; })
-            .sort((a, b) => b.value - a.value);
+        var nodes;
+        if (this.sort) {
+            nodes = d3.hierarchy(this.data).sum((d: any) => { return d.value||!d.children; }).sort((a, b) => b.value - a.value);
+        }
+        else {
+            nodes = d3.hierarchy(this.data).sum((d: any) => { return d.value||!d.children; });
+        }
 
-        var svg = d3.select(svgElement).append("g");
+        var svg = d3.select(this.svg).append("g");
 
-        var padding = 4;
-        var fontsize = 4;
+        var padding = this.padding * scale;
+        var text_size = this.text_size * scale;
+        var header_size = this.header_size * scale;
 
         // add positions to the nodes using the treemap layout
         var treemapLayout = d3.treemap()
-            .size([400, 250])
+            .size([width, height])
             .paddingOuter(padding)
-            .paddingTop(fontsize + 2.5 * padding)
+            .paddingTop(this.show_headers ? header_size + 4 * padding : padding)
             .paddingInner(padding)
             (nodes);
 
@@ -119,62 +240,90 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 .attr("y",      (d: any) => { return d.y0; })
                 .attr("width",  (d: any) => { return d.x1 - d.x0; })
                 .attr("height", (d: any) => { return d.y1 - d.y0; })
-                .attr("stroke", "hsla(0, 0%, 0%, 50%)")
-                .attr("fill",   (d: any) => { return d.data.fill == null ? d3.hsl(0, 0, 0.25) : d3.hsl(
-                    d.data.fill.h == null ? 0 : d.data.fill.h, 
-                    d.data.fill.s == null ? 0 : d.data.fill.s, 
-                    d.data.fill.l == null ? 0.25 : d.data.fill.l)})
-                .attr("filter", "url(#shadow)");
+                //.attr("stroke", "hsla(0, 0%, 0%, 50%)")
+                .attr("stroke", (d: any) => { return d.data.border_color == null ? 
+                    d3.hsl(this.border_h, this.border_s, this.border_l, this.border_a) : 
+                    d3.hsl(
+                        d.data.border_color.h == null ? this.border_h : d.data.border_color.h, 
+                        d.data.border_color.s == null ? this.border_s : d.data.border_color.s, 
+                        d.data.border_color.l == null ? this.border_l : d.data.border_color.l, 
+                        d.data.border_color.a == null ? this.border_a : d.data.border_color.a)})
+                .attr("fill",   (d: any) => { return d.data.fill == null ? 
+                    d3.hsl(this.fill_h, this.fill_s, this.fill_l, this.fill_a) : 
+                    d3.hsl(
+                        d.data.fill.h == null ? this.fill_h : d.data.fill.h, 
+                        d.data.fill.s == null ? this.fill_s : d.data.fill.s, 
+                        d.data.fill.l == null ? this.fill_l : d.data.fill.l, 
+                        d.data.fill.a == null ? this.fill_a : d.data.fill.a)})
+                .attr("filter", this.shadows ? "url(#shadow)" : "");
 
-        svg.selectAll("highlight").data(nodes.descendants()).enter()
-            .append("rect")
-                .attr("x",      (d: any) => { return d.x0; })
-                .attr("y",      (d: any) => { return d.y0; })
-                .attr("width",  (d: any) => { return d.x1 - d.x0; })
-                .attr("height", (d: any) => { return d.y1 - d.y0; })
-                .attr("fill",   "url(#radialgradient)");
+        if (this.shading) {
+            svg.selectAll("highlight").data(nodes.descendants()).enter()
+                .append("rect")
+                    .attr("x",      (d: any) => { return d.x0; })
+                    .attr("y",      (d: any) => { return d.y0; })
+                    .attr("width",  (d: any) => { return d.x1 - d.x0; })
+                    .attr("height", (d: any) => { return d.y1 - d.y0; })
+                    .attr("fill",   "url(#radialgradient)");
+        }
 
         svg.selectAll("text").data(nodes.leaves()).enter()
             .append("text")
-                .attr("x",           (d: any) => { return d.x0 + 0.5 * (d.x1 - d.x0); })
-                .attr("y",           (d: any) => { return d.y0 + 0.5 * (d.y1 - d.y0) + 0.25 * textsize(d, fontsize) })
+                .attr("x",           (d: any) => { 
+                    if (this.horizontal_alignment == "left") return d.x0 + padding; 
+                    if (this.horizontal_alignment == "center") return d.x0 + 0.5 * (d.x1 - d.x0); 
+                    if (this.horizontal_alignment == "right") return d.x1 - padding; 
+                })
+                .attr("y",           (d: any) => { 
+                    if (this.vertical_alignment == "top") return d.y0 + padding + textsize(d, scale, text_size);
+                    if (this.vertical_alignment == "center") return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textsize(d, scale, text_size);
+                    if (this.vertical_alignment == "bottom") return d.y1 - padding;
+                })
                 .attr("left",        (d: any) => { return d.x0; })
                 .attr("top",         (d: any) => { return d.y0; })
                 .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * padding; })
                 .attr("height",      (d: any) => { return d.y1 - d.y0 - 2 * padding; })
-                .attr("text-anchor", "middle")
-                .attr("font-size",   (d: any) => { return textsize(d, fontsize) + "px" })
+                .attr("text-anchor", (d: any) => {
+                      if (this.horizontal_alignment == "left") return "start";
+                      if (this.horizontal_alignment == "center") return "middle";
+                      if (this.horizontal_alignment == "right") return "end";
+                })
+                .attr("font-size",   (d: any) => { return textsize(d, scale, text_size) + "px" })
                 .attr("fill",        (d: any) => { 
-                    return d.data.text_color == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
-                        d.data.text_color.h == null ? 0 : d.data.text_color.h, 
-                        d.data.text_color.s == null ? 0 : d.data.text_color.s, 
-                        d.data.text_color.l == null ? 0.8 : d.data.text_color.l)})
+                    return d.data.text_color == null ? d3.hsl(this.text_h, this.text_s, this.text_l) : d3.hsl(
+                        d.data.text_color.h == null ? this.text_h : d.data.text_color.h, 
+                        d.data.text_color.s == null ? this.text_s : d.data.text_color.s, 
+                        d.data.text_color.l == null ? this.text_l : d.data.text_color.l, 
+                        d.data.text_color.a == null ? this.text_a : d.data.text_color.a)})
                 .attr("opacity",     (d: any) => { 
-                    return ((d.y1 - d.y0 < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
+                    return ((d.y1 - d.y0 < textsize(d, scale, text_size)) || (d.x1 - d.x0 < textsize(d, scale, text_size))) ? 0 : 1})
                 .text((d: any) => { return d.data.name; })
                 .call(wrap);
 
         // label instead of text otherwise it doesn't work
         // use the filter at the end otherwise the previous one doesn't work
-        svg.selectAll("label").data(nodes.descendants().filter(function(d) { return d.children; })).enter()
-            .append("text")
-                .attr("x",           function(d) { return d.x0 + 0.5 * (d.x1 - d.x0); })
-                .attr("y",           function(d) { return d.y0 + padding + textsize(d, fontsize) })
-                .attr("width",       function(d) { return d.x1 - d.x0 - 2 * padding; })
-                .attr("text-anchor", "middle")
-                .attr("font-size",   function(d) { return textsize(d, fontsize) + "px" })
-                .attr("fill",        function(d) { 
-                    return d.data.text_color == null ? d3.hsl(0, 0, 0.8) : d3.hsl(
-                        d.data.text_color.h == null ? 0 : d.data.text_color.h, 
-                        d.data.text_color.s == null ? 0 : d.data.text_color.s, 
-                        d.data.text_color.l == null ? 0.8 : d.data.text_color.l)})
-                .attr("opacity",     function(d) { 
-                    return ((fontsize + padding < textsize(d, fontsize)) || (d.x1 - d.x0 < textsize(d, fontsize))) ? 0 : 1})
-                .text(function(d) { return d.data.name; })
-                .call(ellipse);
+        if (this.show_headers) {
+            svg.selectAll("label").data(nodes.descendants().filter((d: any) => { return d.children; })).enter()
+                .append("text")
+                    .attr("x",           (d: any) => { return d.x0 + 0.5 * (d.x1 - d.x0); })
+                    .attr("y",           (d: any) => { return d.y0 + 2 * padding + 0.8 * textsize(d, scale, header_size) })
+                    .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * padding; })
+                    .attr("text-anchor", "middle")
+                    .attr("font-size",   (d: any) => { return textsize(d, scale, header_size) + "px" })
+                    .attr("fill",        (d: any) => { 
+                        return d.data.text_color == null ? d3.hsl(this.header_h, this.header_s, this.header_l) : d3.hsl(
+                            d.data.text_color.h == null ? this.header_h : d.data.text_color.h, 
+                            d.data.text_color.s == null ? this.header_s : d.data.text_color.s, 
+                            d.data.text_color.l == null ? this.header_s : d.data.text_color.l, 
+                            d.data.text_color.a == null ? this.header_l : d.data.text_color.a)})
+                    .attr("opacity",     (d: any) => { 
+                        return ((header_size + padding < textsize(d, scale, header_size)) || (d.x1 - d.x0 < textsize(d, scale, header_size))) ? 0 : 1})
+                    .text((d: any) => { return d.data.name; })
+                    .call(ellipse);
+        }
 
-        function textsize(d, fontsize) { 
-            return d.data.text_size == null ? fontsize : d.data.text_size; 
+        function textsize(d, scale, fontsize) { 
+            return d.data.text_size == null ? fontsize : scale * d.data.text_size; 
         }
 
         function wrap(text) {
@@ -277,7 +426,10 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     tspan.text(tspan.text() + "...");
                 }
                 if (lineNumber > 0) {
-                    const startDy = -(lineNumber * (lineHeight / 2));
+                    var startDy;
+                    if (vertical_alignment == "top") startDy = 0;
+                    if (vertical_alignment == "center") startDy = -(lineNumber * (lineHeight / 2));
+                    if (vertical_alignment == "bottom") startDy = -(lineNumber * lineHeight);
                     text.selectAll("tspan").attr("dy", (d, i) => startDy + lineHeight * i + "em");
                 }
             });
