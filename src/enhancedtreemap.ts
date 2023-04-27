@@ -70,7 +70,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.svg_id = "enhancedtreemap";
         this.svg_width = 10;
         this.svg_height = 10;
-        this.padding = 4;
+        this.padding = 8;
         this.ctx = ctx;
         this.sort = true;
         this.error = false;
@@ -85,7 +85,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.aspect = 1;
         this.shading = true;
         this.shadows = true;
-        this.shadow_size = this.padding / 2;
+        this.shadow_size = 4;
         this.fixed_width = null;
         this.header_h = this.text_h;
         this.header_s = this.text_s;
@@ -126,15 +126,19 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         parentDiv.replaceWith(wrapper);
     }
 
-    verifyOption(value, option, type) {
+    verifyOption(value, option, type, low, high, value_list) {
         if (type == "float") {
             var output = parseFloat(value);
             if (Number.isNaN(output)) this.handleError(option + " must be a number!");
+            if (low != null && value < low) this.handleError(option + " must be >= " + low);
+            if (high != null && value > high) this.handleError(option + " must be <= " + high);
             return output;
         }
         if (type == "bool") {
             if (typeof value != "boolean") this.handleError(option + " must be true or false (no quotes)!");
-            return value;
+        }
+        if (type == "string") {
+            if (!value_list.includes(value)) this.handleError(option + "must be in this list: " + value_list);
         }
         return value;
     }
@@ -143,52 +147,86 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         var options = this.data.options;
         if (options) {
             options.forEach(option => {
-                if (option.text_size != null) { this.text_size = this.verifyOption(option.text_size, "text_size", "float"); }
+                if (option.text_size != null) 
+                    this.text_size = this.verifyOption(option.text_size, "text_size", "float", 1, null, null); 
                 if (option.text_color != null) {
-                    if (option.text_color.h != null) this.text_h = this.verifyOption(option.text_color.h, "text_color h", "float");
-                    if (option.text_color.s != null) this.text_s = this.verifyOption(option.text_color.s, "text_color s", "float");
-                    if (option.text_color.l != null) this.text_l = this.verifyOption(option.text_color.l, "text_color l", "float");
-                    if (option.text_color.a != null) this.text_a = this.verifyOption(option.text_color.a, "text_color a", "float");
+                    if (option.text_color.h != null) 
+                        this.text_h = this.verifyOption(option.text_color.h, "text_color h", "float", 0, 360, null);
+                    if (option.text_color.s != null) 
+                        this.text_s = this.verifyOption(option.text_color.s, "text_color s", "float", 0, 1, null);
+                    if (option.text_color.l != null) 
+                        this.text_l = this.verifyOption(option.text_color.l, "text_color l", "float", 0, 1, null);
+                    if (option.text_color.a != null) 
+                        this.text_a = this.verifyOption(option.text_color.a, "text_color a", "float", 0, 1, null);
+                }
+
+                if (option.header_size != null) 
+                    this.header_size = this.verifyOption(option.header_size, "header_size", "float", 0, null, null);
+                if (option.header_color != null) {
+                    if (option.header_color.h != null) 
+                        this.header_h = this.verifyOption(option.header_color.h, "header h", "float", 0, 360, null);
+                    if (option.header_color.s != null) 
+                        this.header_s = this.verifyOption(option.header_color.s, "header s", "float", 0, 1, null);
+                    if (option.header_color.l != null) 
+                        this.header_l = this.verifyOption(option.header_color.l, "header l", "float", 0, 1, null);
+                    if (option.header_color.a != null) 
+                        this.header_a = this.verifyOption(option.header_color.a, "header a", "float", 0, 1, null);
                 }
                 if (option.fill != null) {
-                    if (option.fill.h != null) this.fill_h = this.verifyOption(option.fill.h, "fill h", "float");
-                    if (option.fill.s != null) this.fill_s = this.verifyOption(option.fill.s, "fill s", "float");
-                    if (option.fill.l != null) this.fill_l = this.verifyOption(option.fill.l, "fill l", "float");
-                    if (option.fill.a != null) this.fill_a = this.verifyOption(option.fill.a, "fill a", "float");
+                    if (option.fill.h != null) 
+                        this.fill_h = this.verifyOption(option.fill.h, "fill h", "float", 0, 360, null);
+                    if (option.fill.s != null) 
+                        this.fill_s = this.verifyOption(option.fill.s, "fill s", "float", 0, 1, null);
+                    if (option.fill.l != null) 
+                        this.fill_l = this.verifyOption(option.fill.l, "fill l", "float", 0, 1, null);
+                    if (option.fill.a != null) 
+                        this.fill_a = this.verifyOption(option.fill.a, "fill a", "float", 0, 1, null);
                 }
-                if (option.shading != null) this.shading = this.verifyOption(option.shading, "shading", "bool");
-                if (option.shadows != null) this.shadows = this.verifyOption(option.shadows, "shadows", "bool");
-                if (option.shadow_size != null) this.shadow_size = this.verifyOption(option.shadow_size, "shadow_size", "float");
-                if (option.header_size != null) this.header_size = this.verifyOption(option.header_size, "header_size", "float");
-                if (option.header_color != null) {
-                    if (option.header_color.h != null) this.header_h = this.verifyOption(option.header_color.h, "header h", "float");
-                    if (option.header_color.s != null) this.header_s = this.verifyOption(option.header_color.s, "header s", "float");
-                    if (option.header_color.l != null) this.header_l = this.verifyOption(option.header_color.l, "header l", "float");
-                    if (option.header_color.a != null) this.header_a = this.verifyOption(option.header_color.a, "header a", "float");
-                }
+
+                if (option.shading != null) 
+                    this.shading = this.verifyOption(option.shading, "shading", "bool", null, null, null);
+
+                if (option.shadows != null) 
+                    this.shadows = this.verifyOption(option.shadows, "shadows", "bool", null, null, null);
+                if (option.shadow_size != null) 
+                    this.shadow_size = this.verifyOption(option.shadow_size, "shadow_size", "float", 0, null, null);
+
                 if (option.border_color != null) {
-                    if (option.border_color.h != null) this.border_h = this.verifyOption(option.border_color.h, "border h", "float");
-                    if (option.border_color.s != null) this.border_s = this.verifyOption(option.border_color.s, "border s", "float");
-                    if (option.border_color.l != null) this.border_l = this.verifyOption(option.border_color.l, "border l", "float");
-                    if (option.border_color.a != null) this.border_a = this.verifyOption(option.border_color.a, "border a", "float");
+                    if (option.border_color.h != null) this.border_h = this.verifyOption(option.border_color.h, "border h", "float", 0, 360, null);
+                    if (option.border_color.s != null) this.border_s = this.verifyOption(option.border_color.s, "border s", "float", 0, 1, null);
+                    if (option.border_color.l != null) this.border_l = this.verifyOption(option.border_color.l, "border l", "float", 0, 1, null);
+                    if (option.border_color.a != null) this.border_a = this.verifyOption(option.border_color.a, "border a", "float", 0, 1, null);
                 }
 
-                if (option.show_headers != null) this.show_headers = this.verifyOption(option.show_headers, "show_headers", "bool");
-                if (this.show_headers == false) this.header_size = 0;
+                if (option.show_headers != null) 
+                    this.show_headers = this.verifyOption(option.show_headers, "show_headers", "bool", null, null, null);
+                if (this.show_headers == false) 
+                    this.header_size = 0;
 
-                if (option.padding != null) this.padding = this.verifyOption(option.padding, "padding", "float");
+                if (option.padding != null) 
+                    this.padding = this.verifyOption(option.padding, "padding", "float", 0, null, null);
 
                 if (option.aspect_ratio != null) {
+                    var aspect;
                     var ratio = option.aspect_ratio.split(":");
                     if (ratio[0] == 0 || ratio[1] == 0) this.handleError("aspect_ratio cannot include any zeros");
-                    else this.aspect = ratio[0] / ratio[1];
+                    else aspect = ratio[0] / ratio[1];
+                    this.aspect = this.verifyOption(aspect, "aspect_ratio", "float", 0, null, null);
                 }
 
-                if (option.vertical_alignment != null) this.vertical_alignment = option.vertical_alignment;
-                if (option.horizontal_alignment != null) this.horizontal_alignment = option.horizontal_alignment;
-                if (option.header_alignment != null) this.header_alignment = option.header_alignment;
-                if (option.width != null) this.fixed_width = this.verifyOption(option.width, "width", "float");
-                if (option.sort != null) this.sort = this.verifyOption(option.sort, "sort", "bool");
+                
+                if (option.vertical_alignment != null) 
+                    this.vertical_alignment = this.verifyOption(option.vertical_alignment, "vertical_alignment", "string", null, null, ["top", "center", "bottom"]);
+                if (option.horizontal_alignment != null) 
+                    this.horizontal_alignment = this.verifyOption(option.horizontal_alignment, "horizontal_alignment", "string", null, null, ["left", "center", "right"]);
+                if (option.header_alignment != null) 
+                    this.header_alignment = this.verifyOption(option.header_alignment, "header_alignment", "string", null, null, ["left", "center", "right"]);
+
+                if (option.width != null) 
+                    this.fixed_width = this.verifyOption(option.width, "width", "float", 1, null, null);
+
+                if (option.sort != null) 
+                    this.sort = this.verifyOption(option.sort, "sort", "bool", null, null, null);
             });
         }
     }
