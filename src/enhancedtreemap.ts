@@ -56,6 +56,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     fixed_width: float;
     header_size: float;
     show_headers: bool;
+    header_alignment: string;
     vertical_alignment: string;
     horizontal_alignment: string;
     enhancedtreemap: EnhancedTreeMap;
@@ -93,6 +94,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.text_size = 12;
         this.header_size = this.text_size;
         this.show_headers = true;
+        this.header_alignment = "center";
         this.vertical_alignment = "center";
         this.horizontal_alignment = "center";
     }
@@ -146,6 +148,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 }
                 if (option.vertical_alignment != null) this.vertical_alignment = option.vertical_alignment;
                 if (option.horizontal_alignment != null) this.horizontal_alignment = option.horizontal_alignment;
+                if (option.header_alignment != null) this.header_alignment = option.header_alignment;
                 if (option.width != null) this.fixed_width = option.width;
                 if (option.sort != null) this.sort = option.sort;
             });
@@ -240,21 +243,22 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 .attr("y",      (d: any) => { return d.y0; })
                 .attr("width",  (d: any) => { return d.x1 - d.x0; })
                 .attr("height", (d: any) => { return d.y1 - d.y0; })
-                //.attr("stroke", "hsla(0, 0%, 0%, 50%)")
                 .attr("stroke", (d: any) => { return d.data.border_color == null ? 
                     d3.hsl(this.border_h, this.border_s, this.border_l, this.border_a) : 
                     d3.hsl(
                         d.data.border_color.h == null ? this.border_h : d.data.border_color.h, 
                         d.data.border_color.s == null ? this.border_s : d.data.border_color.s, 
                         d.data.border_color.l == null ? this.border_l : d.data.border_color.l, 
-                        d.data.border_color.a == null ? this.border_a : d.data.border_color.a)})
+                        d.data.border_color.a == null ? this.border_a : d.data.border_color.a)
+                })
                 .attr("fill",   (d: any) => { return d.data.fill == null ? 
                     d3.hsl(this.fill_h, this.fill_s, this.fill_l, this.fill_a) : 
                     d3.hsl(
                         d.data.fill.h == null ? this.fill_h : d.data.fill.h, 
                         d.data.fill.s == null ? this.fill_s : d.data.fill.s, 
                         d.data.fill.l == null ? this.fill_l : d.data.fill.l, 
-                        d.data.fill.a == null ? this.fill_a : d.data.fill.a)})
+                        d.data.fill.a == null ? this.fill_a : d.data.fill.a)
+                })
                 .attr("filter", this.shadows ? "url(#shadow)" : "");
 
         if (this.shading) {
@@ -270,23 +274,23 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         svg.selectAll("text").data(nodes.leaves()).enter()
             .append("text")
                 .attr("x",           (d: any) => { 
-                    if (this.horizontal_alignment == "left") return d.x0 + padding; 
-                    if (this.horizontal_alignment == "center") return d.x0 + 0.5 * (d.x1 - d.x0); 
-                    if (this.horizontal_alignment == "right") return d.x1 - padding; 
+                        if (d.data.horizontal_alignment == "left"   || (d.data.horizontal_alignment == null && this.horizontal_alignment == "left"))   return d.x0 + padding; 
+                        if (d.data.horizontal_alignment == "center" || (d.data.horizontal_alignment == null && this.horizontal_alignment == "center")) return d.x0 + 0.5 * (d.x1 - d.x0); 
+                        if (d.data.horizontal_alignment == "right"  || (d.data.horizontal_alignment == null && this.horizontal_alignment == "right"))  return d.x1 - padding; 
                 })
                 .attr("y",           (d: any) => { 
-                    if (this.vertical_alignment == "top") return d.y0 + padding + textsize(d, scale, text_size);
-                    if (this.vertical_alignment == "center") return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textsize(d, scale, text_size);
-                    if (this.vertical_alignment == "bottom") return d.y1 - padding;
+                    if (d.data.vertical_alignment == "left"   || (d.data.vertical_alignment == null && this.vertical_alignment == "top"))    return d.y0 + padding + textsize(d, scale, text_size);
+                    if (d.data.vertical_alignment == "center" || (d.data.vertical_alignment == null && this.vertical_alignment == "center")) return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textsize(d, scale, text_size);
+                    if (d.data.vertical_alignment == "right"  || (d.data.vertical_alignment == null && this.vertical_alignment == "bottom")) return d.y1 - padding;
                 })
                 .attr("left",        (d: any) => { return d.x0; })
                 .attr("top",         (d: any) => { return d.y0; })
                 .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * padding; })
                 .attr("height",      (d: any) => { return d.y1 - d.y0 - 2 * padding; })
                 .attr("text-anchor", (d: any) => {
-                      if (this.horizontal_alignment == "left") return "start";
-                      if (this.horizontal_alignment == "center") return "middle";
-                      if (this.horizontal_alignment == "right") return "end";
+                      if (d.data.horizontal_alignment == "left"   || (d.data.horizontal_alignment == null && this.horizontal_alignment == "left"))   return "start";
+                      if (d.data.horizontal_alignment == "center" || (d.data.horizontal_alignment == null && this.horizontal_alignment == "center")) return "middle";
+                      if (d.data.horizontal_alignment == "right"  || (d.data.horizontal_alignment == null && this.horizontal_alignment == "right"))  return "end";
                 })
                 .attr("font-size",   (d: any) => { return textsize(d, scale, text_size) + "px" })
                 .attr("fill",        (d: any) => { 
@@ -294,9 +298,9 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         d.data.text_color.h == null ? this.text_h : d.data.text_color.h, 
                         d.data.text_color.s == null ? this.text_s : d.data.text_color.s, 
                         d.data.text_color.l == null ? this.text_l : d.data.text_color.l, 
-                        d.data.text_color.a == null ? this.text_a : d.data.text_color.a)})
-                .attr("opacity",     (d: any) => { 
-                    return ((d.y1 - d.y0 < textsize(d, scale, text_size)) || (d.x1 - d.x0 < textsize(d, scale, text_size))) ? 0 : 1})
+                        d.data.text_color.a == null ? this.text_a : d.data.text_color.a)
+                })
+                .attr("opacity",     (d: any) => { return ((d.y1 - d.y0 < textsize(d, scale, text_size)) || (d.x1 - d.x0 < textsize(d, scale, text_size))) ? 0 : 1 })
                 .text((d: any) => { return d.data.name; })
                 .call(wrap);
 
@@ -305,19 +309,27 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         if (this.show_headers) {
             svg.selectAll("label").data(nodes.descendants().filter((d: any) => { return d.children; })).enter()
                 .append("text")
-                    .attr("x",           (d: any) => { return d.x0 + 0.5 * (d.x1 - d.x0); })
+                    .attr("x",           (d: any) => { 
+                            if (d.data.header_alignment == "left"   || (d.data.header_alignment == null && this.header_alignment == "left"))   return d.x0 + 1.5 * padding; 
+                            if (d.data.header_alignment == "center" || (d.data.header_alignment == null && this.header_alignment == "center")) return d.x0 + 0.5 * (d.x1 - d.x0); 
+                            if (d.data.header_alignment == "right"  || (d.data.header_alignment == null && this.header_alignment == "right"))  return d.x1 - 1.5 * padding; 
+                    })
                     .attr("y",           (d: any) => { return d.y0 + 2 * padding + 0.8 * textsize(d, scale, header_size) })
                     .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * padding; })
-                    .attr("text-anchor", "middle")
+                    .attr("text-anchor", (d: any) => {
+                          if (d.data.header_alignment == "left"   || (d.data.header_alignment == null && this.header_alignment == "left"))   return "start";
+                          if (d.data.header_alignment == "center" || (d.data.header_alignment == null && this.header_alignment == "center")) return "middle";
+                          if (d.data.header_alignment == "right"  || (d.data.header_alignment == null && this.header_alignment == "right"))  return "end";
+                    })
                     .attr("font-size",   (d: any) => { return textsize(d, scale, header_size) + "px" })
                     .attr("fill",        (d: any) => { 
                         return d.data.text_color == null ? d3.hsl(this.header_h, this.header_s, this.header_l) : d3.hsl(
                             d.data.text_color.h == null ? this.header_h : d.data.text_color.h, 
                             d.data.text_color.s == null ? this.header_s : d.data.text_color.s, 
                             d.data.text_color.l == null ? this.header_s : d.data.text_color.l, 
-                            d.data.text_color.a == null ? this.header_l : d.data.text_color.a)})
-                    .attr("opacity",     (d: any) => { 
-                        return ((header_size + padding < textsize(d, scale, header_size)) || (d.x1 - d.x0 < textsize(d, scale, header_size))) ? 0 : 1})
+                            d.data.text_color.a == null ? this.header_l : d.data.text_color.a)
+                    })
+                    .attr("opacity",     (d: any) => { return ((header_size + padding < textsize(d, scale, header_size)) || (d.x1 - d.x0 < textsize(d, scale, header_size))) ? 0 : 1 })
                     .text((d: any) => { return d.data.name; })
                     .call(ellipse);
         }
