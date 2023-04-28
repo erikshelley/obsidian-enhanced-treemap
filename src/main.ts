@@ -61,22 +61,25 @@ const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
     header_alignment:     "left",
 
     // Color Options
-    border_h: 0,
-    border_s: 0,
-    border_l: 0,
-    border_a: 0.5,
-    fill_h: 0,
-    fill_s: 0,
-    fill_l: 0.25,
-    fill_a: 1,
-    text_h: 0,
-    text_s: 0,
-    text_l: 0.8,
-    text_a: 1,
-    header_h: 0,
-    header_s: 0,
-    header_l: 0.8,
-    header_a: 1,
+    border_h:             0,
+    border_s:             0,
+    border_l:             0,
+    border_a:             0.5,
+
+    fill_h:               0,
+    fill_s:               0,
+    fill_l:               0.25,
+    fill_a:               1,
+
+    text_h:               0,
+    text_s:               0,
+    text_l:               0.8,
+    text_a:               1,
+
+    header_h:             0,
+    header_s:             0,
+    header_l:             0.9,
+    header_a:             1,
 
     // Other Styling Options
     shading:              true,
@@ -160,10 +163,12 @@ class SampleSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.aspect_w.toString() + ":" + this.plugin.settings.aspect_h.toString())
                 .onChange(async (value) => {
                     var ratio = value.split(":");
-                    this.plugin.settings.aspect_w = ratio[0];
-                    this.plugin.settings.aspect_h = ratio[1];
-                    this.plugin.settings.aspect = ratio[0] / ratio[1];
-                    await this.plugin.saveSettings();
+                    if (ratio[0] > 0 && ratio[1] > 0) {
+                        this.plugin.settings.aspect_w = ratio[0];
+                        this.plugin.settings.aspect_h = ratio[1];
+                        this.plugin.settings.aspect = ratio[0] / ratio[1];
+                        await this.plugin.saveSettings();
+                    }
                 }));
 
         new Setting(containerEl)
@@ -182,8 +187,10 @@ class SampleSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.width.toString())
                 .onChange(async (value) => {
-                    this.plugin.settings.width = value;
-                    await this.plugin.saveSettings();
+                    if (value > 0) {
+                        this.plugin.settings.width = value;
+                        await this.plugin.saveSettings();
+                    }
                 }));
 
         new Setting(containerEl)
@@ -192,8 +199,10 @@ class SampleSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.header_size.toString())
                 .onChange(async (value) => {
-                    this.plugin.settings.header_size = value;
-                    await this.plugin.saveSettings();
+                    if (value > 0) {
+                        this.plugin.settings.header_size = value;
+                        await this.plugin.saveSettings();
+                    }
                 }));
 
         new Setting(containerEl)
@@ -202,8 +211,10 @@ class SampleSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.text_size.toString())
                 .onChange(async (value) => {
-                    this.plugin.settings.text_size = value;
-                    await this.plugin.saveSettings();
+                    if (value > 0) {
+                        this.plugin.settings.text_size = value;
+                        await this.plugin.saveSettings();
+                    }
                 }));
 
         new Setting(containerEl)
@@ -212,8 +223,10 @@ class SampleSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.padding.toString())
                 .onChange(async (value) => {
-                    this.plugin.settings.padding = value;
-                    await this.plugin.saveSettings();
+                    if (value > 0) {
+                        this.plugin.settings.padding = value;
+                        await this.plugin.saveSettings();
+                    }
                 }));
 
         new Setting(containerEl)
@@ -284,10 +297,10 @@ class SampleSettingTab extends PluginSettingTab {
                 hsla += this.plugin.settings.border_a;
                 text.setValue(hsla).onChange(async (v) => {
                     var values = v.split(", ");
-                    this.plugin.settings.border_h = values[0];
-                    this.plugin.settings.border_s = values[1];
-                    this.plugin.settings.border_l = values[2];
-                    this.plugin.settings.border_a = values[3];
+                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.border_h = values[0];
+                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.border_s = values[1];
+                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.border_l = values[2];
+                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.border_a = values[3];
                     await this.plugin.saveSettings();
                 });
             });
@@ -302,10 +315,10 @@ class SampleSettingTab extends PluginSettingTab {
                 hsla += this.plugin.settings.fill_a;
                 text.setValue(hsla).onChange(async (v) => {
                     var values = v.split(", ");
-                    this.plugin.settings.fill_h = values[0];
-                    this.plugin.settings.fill_s = values[1];
-                    this.plugin.settings.fill_l = values[2];
-                    this.plugin.settings.fill_a = values[3];
+                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.fill_h = values[0];
+                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.fill_s = values[1];
+                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.fill_l = values[2];
+                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.fill_a = values[3];
                     await this.plugin.saveSettings();
                 });
             });
@@ -320,10 +333,10 @@ class SampleSettingTab extends PluginSettingTab {
                 hsla += this.plugin.settings.text_a;
                 text.setValue(hsla).onChange(async (v) => {
                     var values = v.split(", ");
-                    this.plugin.settings.text_h = values[0];
-                    this.plugin.settings.text_s = values[1];
-                    this.plugin.settings.text_l = values[2];
-                    this.plugin.settings.text_a = values[3];
+                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.text_h = values[0];
+                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.text_s = values[1];
+                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.text_l = values[2];
+                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.text_a = values[3];
                     await this.plugin.saveSettings();
                 });
             });
@@ -338,10 +351,10 @@ class SampleSettingTab extends PluginSettingTab {
                 hsla += this.plugin.settings.header_a;
                 text.setValue(hsla).onChange(async (v) => {
                     var values = v.split(", ");
-                    this.plugin.settings.header_h = values[0];
-                    this.plugin.settings.header_s = values[1];
-                    this.plugin.settings.header_l = values[2];
-                    this.plugin.settings.header_a = values[3];
+                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.header_h = values[0];
+                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.header_s = values[1];
+                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.header_l = values[2];
+                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.header_a = values[3];
                     await this.plugin.saveSettings();
                 });
             });
@@ -375,8 +388,10 @@ class SampleSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.shadow_size.toString())
                 .onChange(async (value) => {
-                    this.plugin.settings.shadow_size = value;
-                    await this.plugin.saveSettings();
+                    if (value > 0) {
+                        this.plugin.settings.shadow_size = value;
+                        await this.plugin.saveSettings();
+                    }
                 }));
 
         new Setting(containerEl)
