@@ -13,7 +13,7 @@ export default class EnhancedTreeMap {
 
         // need this "await" on adding the svg to the DOM before adding the text otherwise getComputedTextLenght does not work
         await this.plugin.app.workspace.onLayoutReady(() => {
-            renderer = new EnhancedTreeMapRenderChild(element, this, ctx);
+            renderer = new EnhancedTreeMapRenderChild(element, this, ctx, this.plugin.settings);
             ctx.addChild(renderer);
         });
 
@@ -24,83 +24,107 @@ export default class EnhancedTreeMap {
 }
 
 class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
-    svg: HTMLElement;
-    ctx: string;
-    data: string;
-    sort: bool;
-    error: bool;
-    element: HTMLElement;
-    text_h: float;
-    text_s: float;
-    text_l: float;
-    text_a: float;
-    fill_h: float;
-    fill_s: float;
-    fill_l: float;
-    fill_a: float;
-    aspect: float;
-    svg_id: string;
-    shading: bool;
-    shadows: bool;
-    padding: float;
-    header_h: float;
-    header_s: float;
-    header_l: float;
-    header_a: float;
-    border_h: float;
-    border_s: float;
-    border_l: float;
-    border_a: float;
-    text_size: float;
-    svg_width: float;
-    svg_height: float;
-    fixed_width: float;
-    header_size: float;
-    shadow_size: float;
-    show_headers: bool;
-    header_alignment: string;
-    vertical_alignment: string;
-    horizontal_alignment: string;
-    enhancedtreemap: EnhancedTreeMap;
+    ctx:                  string;
+    data:                 string;
+    uuid:                 float;
+    element:              HTMLElement;
+    enhancedtreemap:      EnhancedTreeMap;
+    error:                bool;
+    svg:                  HTMLElement;
+    svg_height:           float;
+    svg_id:               string;
+    svg_width:            float;
 
-    constructor(element: HTMLElement, enhancedtreemap: EnhancedTreeMap, ctx: MarkdownPostProcessorContext) {
+    // Size & Shape Options
+    aspect:               float;
+    aspect_w:             float;
+    aspect_h:             float;
+    fixed_width:          bool;
+    width:                float;
+    padding:              float;
+    text_size:            float;
+    header_size:          float;
+    sort:                 bool;
+
+    // Alignment Options
+    horizontal_alignment: string;
+    vertical_alignment:   string;
+    header_alignment:     string;
+
+    // Color Options
+    border_h:             float;
+    border_s:             float;
+    border_l:             float;
+    border_a:             float;
+    fill_h:               float;
+    fill_s:               float;
+    fill_l:               float;
+    fill_a:               float;
+    text_h:               float;
+    text_s:               float;
+    text_l:               float;
+    text_a:               float;
+    header_h:             float;
+    header_s:             float;
+    header_l:             float;
+    header_a:             float;
+
+    // Other Styling Options
+    shading:              bool;
+    shadow:               bool;
+    shadow_size:          float;
+    show_headers:         bool;
+
+    constructor(element: HTMLElement, enhancedtreemap: EnhancedTreeMap, ctx: MarkdownPostProcessorContext, settings: array) {
         super(element);
-        this.element = element;
-        this.enhancedtreemap = enhancedtreemap;
-        this.svg_id = "enhancedtreemap";
-        this.svg_width = 10;
-        this.svg_height = 10;
-        this.padding = 8;
-        this.ctx = ctx;
-        this.sort = true;
-        this.error = false;
-        this.text_h = 0;
-        this.text_s = 0;
-        this.text_l = 0.8;
-        this.text_a = 1;
-        this.fill_h = 0;
-        this.fill_s = 0;
-        this.fill_l = 0.25;
-        this.fill_a = 1;
-        this.aspect = 1;
-        this.shading = true;
-        this.shadows = true;
-        this.shadow_size = 4;
-        this.fixed_width = null;
-        this.header_h = this.text_h;
-        this.header_s = this.text_s;
-        this.header_l = this.text_l;
-        this.header_a = this.text_a;
-        this.border_h = 0;
-        this.border_s = 0;
-        this.border_l = 0;
-        this.border_a = 0.5;
-        this.text_size = 12;
-        this.header_size = 16;
-        this.show_headers = true;
-        this.header_alignment = "center";
-        this.vertical_alignment = "center";
-        this.horizontal_alignment = "center";
+        this.ctx                  = ctx;
+        this.element              = element;
+        this.enhancedtreemap      = enhancedtreemap;
+        this.error                = false;
+        this.svg_id               = "enhancedtreemap";
+        this.svg_height           = 10;
+        this.svg_width            = 10;
+
+        // Size & Shape Options
+        this.aspect               = settings.aspect;
+        this.aspect_w             = settings.aspect_w;
+        this.aspect_h             = settings.aspect_h;
+        this.fixed_width          = settings.fixed_width;
+        this.width                = settings.width;
+        this.header_size          = settings.header_size;
+        this.padding              = settings.padding;
+        this.text_size            = settings.text_size;
+        this.sort                 = settings.sort;
+
+        // Alignment Options
+        this.horizontal_alignment = settings.horizontal_alignment;
+        this.vertical_alignment   = settings.vertical_alignment;
+        this.header_alignment     = settings.header_alignment;
+
+        // Color Options
+        this.border_h             = settings.border_h;
+        this.border_s             = settings.border_s;
+        this.border_l             = settings.border_l;
+        this.border_a             = settings.border_a;
+        this.fill_h               = settings.fill_h;
+        this.fill_s               = settings.fill_s;
+        this.fill_l               = settings.fill_l;
+        this.fill_a               = settings.fill_a;
+        this.text_h               = settings.text_h;
+        this.text_s               = settings.text_s;
+        this.text_l               = settings.text_l;
+        this.text_a               = settings.text_a;
+        this.header_h             = settings.header_h;
+        this.header_s             = settings.header_s;
+        this.header_l             = settings.header_l;
+        this.header_a             = settings.header_a;
+
+        // Other Styling Options
+        this.shading              = settings.shading;
+        this.shadow               = settings.shadow;
+        this.shadow_size          = settings.shadow_size;
+        this.show_headers         = settings.show_headers;
+
     }
 
     async onload() {
@@ -186,8 +210,8 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 if (option.shading != null) 
                     this.shading = this.verifyOption(option.shading, "shading", "bool", null, null, null);
 
-                if (option.shadows != null) 
-                    this.shadows = this.verifyOption(option.shadows, "shadows", "bool", null, null, null);
+                if (option.shadow != null) 
+                    this.shadow = this.verifyOption(option.shadow, "shadow", "bool", null, null, null);
                 if (option.shadow_size != null) 
                     this.shadow_size = this.verifyOption(option.shadow_size, "shadow_size", "float", 0, null, null);
 
@@ -207,13 +231,14 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     this.padding = this.verifyOption(option.padding, "padding", "float", 0, null, null);
 
                 if (option.aspect_ratio != null) {
-                    var aspect;
+                    var aspect = 1;
                     var ratio = option.aspect_ratio.split(":");
                     if (ratio[0] == 0 || ratio[1] == 0) this.handleError("aspect_ratio cannot include any zeros");
                     else aspect = ratio[0] / ratio[1];
                     this.aspect = this.verifyOption(aspect, "aspect_ratio", "float", 0, null, null);
+                    this.aspect_w = ratio[0];
+                    this.aspect_h = ratio[1];
                 }
-
                 
                 if (option.vertical_alignment != null) 
                     this.vertical_alignment = this.verifyOption(option.vertical_alignment, "vertical_alignment", "string", null, null, ["top", "center", "bottom"]);
@@ -222,8 +247,12 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 if (option.header_alignment != null) 
                     this.header_alignment = this.verifyOption(option.header_alignment, "header_alignment", "string", null, null, ["left", "center", "right"]);
 
-                if (option.width != null) 
-                    this.fixed_width = this.verifyOption(option.width, "width", "float", 1, null, null);
+                if (option.fixed_width != null) {
+                    this.fixed_width = option.fixed_width;
+                }
+                if (option.width != null) {
+                    this.width = this.verifyOption(option.width, "width", "float", 1, null, null);
+                }
 
                 if (option.sort != null) 
                     this.sort = this.verifyOption(option.sort, "sort", "bool", null, null, null);
@@ -236,17 +265,18 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         wrapper.classList.add("block-language-json");
 
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        const svg_id = "enhancedtreemap_" + Math.floor(Math.random() * 100000);
+        this.uuid = Math.floor(Math.random() * 100000);
+        const svg_id = "enhancedtreemap_" + this.uuid;
         this.svg_id = svg_id;
         svg.setAttribute("id", svg_id);
 
-        if (this.fixed_width == null) { 
+        if (this.fixed_width == false) { 
             svg.setAttribute("width", "100%"); 
             svg.setAttribute("viewBox", "0 0 " + this.svg_width + " " + this.svg_height);
         }
         else { 
-            this.svg_width = this.fixed_width;
-            this.svg_height = this.fixed_width / this.aspect;
+            this.svg_width = this.width;
+            this.svg_height = this.width / this.aspect;
             svg.setAttribute("width", this.svg_width); 
             svg.setAttribute("height", this.svg_height)
         }
@@ -257,7 +287,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
 
         const radialGradient = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
-        radialGradient.setAttribute("id", "radialgradient");
+        radialGradient.setAttribute("id", "radialgradient" + this.uuid);
         radialGradient.setAttribute("cx", "25%");
         radialGradient.setAttribute("cy", "25%");
         radialGradient.setAttribute("r", "100%");
@@ -274,7 +304,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         svg.appendChild(defs);
 
         const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-        filter.setAttribute("id", "shadow");
+        filter.setAttribute("id", "shadow" + this.uuid);
         filter.setAttribute("color-interpolation-filters", "sRGB");
 
         const feDropShadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
@@ -290,12 +320,13 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
 
     renderEnhancedTreeMap() {
         if (this.error) return;
-        var scale = this.aspect;
         var svg_element = document.getElementById(this.svg_id);
         var width = this.svg_width;
         var height = this.svg_height;
+        var scale = 1;
 
         if (!this.fixed_width) {
+            scale = this.aspect;
             width = svg_element.parentElement.offsetWidth * scale;
             height = svg_element.parentElement.offsetHeight;
             svg_element.setAttribute("viewBox", "0 0 " + width + " " + height);
@@ -352,7 +383,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         d.data.fill.l == null ? this.fill_l : d.data.fill.l, 
                         d.data.fill.a == null ? this.fill_a : d.data.fill.a)
                 })
-                .attr("filter", this.shadows ? "url(#shadow)" : "");
+                .attr("filter", this.shadow ? "url(#shadow" + this.uuid + ")" : "");
 
         if (this.shading) {
             svg.selectAll("highlight").data(nodes.descendants()).enter()
@@ -361,7 +392,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     .attr("y",      (d: any) => { return d.y0; })
                     .attr("width",  (d: any) => { return d.x1 - d.x0; })
                     .attr("height", (d: any) => { return d.y1 - d.y0; })
-                    .attr("fill",   "url(#radialgradient)")
+                    .attr("fill",   "url(#radialgradient" + this.uuid + ")")
                     .append("title").text((d: any) => { return d.data.name; });
         }
 
@@ -388,7 +419,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 })
                 .attr("font-size",   (d: any) => { return textsize(d, scale, text_size) + "px" })
                 .attr("fill",        (d: any) => { 
-                    return d.data.text_color == null ? d3.hsl(this.text_h, this.text_s, this.text_l) : d3.hsl(
+                    return d.data.text_color == null ? d3.hsl(this.text_h, this.text_s, this.text_l, this.text_a) : d3.hsl(
                         d.data.text_color.h == null ? this.text_h : d.data.text_color.h, 
                         d.data.text_color.s == null ? this.text_s : d.data.text_color.s, 
                         d.data.text_color.l == null ? this.text_l : d.data.text_color.l, 
@@ -418,7 +449,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     })
                     .attr("font-size",   (d: any) => { return textsize(d, scale, header_size) + "px" })
                     .attr("fill",        (d: any) => { 
-                        return d.data.text_color == null ? d3.hsl(this.header_h, this.header_s, this.header_l) : d3.hsl(
+                        return d.data.text_color == null ? d3.hsl(this.header_h, this.header_s, this.header_l, this.header_a) : d3.hsl(
                             d.data.text_color.h == null ? this.header_h : d.data.text_color.h, 
                             d.data.text_color.s == null ? this.header_s : d.data.text_color.s, 
                             d.data.text_color.l == null ? this.header_s : d.data.text_color.l, 
