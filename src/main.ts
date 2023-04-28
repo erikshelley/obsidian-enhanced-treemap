@@ -104,7 +104,6 @@ export default class EnhancedTreemapPlugin extends Plugin {
         // only create the tree if there is a code block containing the expected text
         var codeblock = element.querySelector("code");
         if (codeblock == null) return;
-
         var data = codeblock.textContent;
         if (data.match(/"type": "enhancedtreemap"/)) {
             await this.enhancedtreemap.renderEnhancedTreeMap(element, context);
@@ -113,12 +112,15 @@ export default class EnhancedTreemapPlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
-
         this.addSettingTab(new SampleSettingTab(this.app, this));
-
         this.enhancedtreemap = new EnhancedTreeMap(this);
-
         this.registerMarkdownPostProcessor((el, ctx) => this.postprocessor(el, ctx));
+
+		/*this.app.workspace.onLayoutReady(() => {
+			this.previousWidth = window.innerWidth;
+			this.toggleSidebars();
+			app.workspace.on('resize', () => this.toggleSidebars());
+		});*/
 
         // If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
         // Using this function will automatically remove the event listener when this plugin is disabled.

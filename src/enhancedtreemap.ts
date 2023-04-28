@@ -404,10 +404,11 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         if (d.data.horizontal_alignment == "right"  || (d.data.horizontal_alignment == null && this.horizontal_alignment == "right"))  return d.x1 - padding; 
                 })
                 .attr("y",           (d: any) => { 
-                    if (d.data.vertical_alignment == "top"   || (d.data.vertical_alignment == null && this.vertical_alignment == "top"))    return d.y0 + padding + textsize(d, scale, text_size);
-                    if (d.data.vertical_alignment == "center" || (d.data.vertical_alignment == null && this.vertical_alignment == "center")) return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textsize(d, scale, text_size);
+                    if (d.data.vertical_alignment == "top"     || (d.data.vertical_alignment == null && this.vertical_alignment == "top"))    return d.y0 + padding + textsize(d, scale, text_size);
+                    if (d.data.vertical_alignment == "center"  || (d.data.vertical_alignment == null && this.vertical_alignment == "center")) return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textsize(d, scale, text_size);
                     if (d.data.vertical_alignment == "bottom"  || (d.data.vertical_alignment == null && this.vertical_alignment == "bottom")) return d.y1 - padding;
                 })
+                .attr("v-align",     (d: any) => { return d.data.vertical_alignment })
                 .attr("left",        (d: any) => { return d.x0; })
                 .attr("top",         (d: any) => { return d.y0; })
                 .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * padding; })
@@ -425,7 +426,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         d.data.text_color.l == null ? this.text_l : d.data.text_color.l, 
                         d.data.text_color.a == null ? this.text_a : d.data.text_color.a)
                 })
-                .attr("opacity",     (d: any) => { return ((d.y1 - d.y0 < textsize(d, scale, text_size)) || (d.x1 - d.x0 < textsize(d, scale, text_size))) ? 0 : 1 })
+                .attr("opacity",     (d: any) => { return ((d.y1 - d.y0 < textsize(d, scale, text_size)) || (d.x1 - d.x0 < 2 * textsize(d, scale, text_size))) ? 0 : 1 })
                 .text((d: any) => { return d.data.name; })
                 .call(wrap)
                 .append("title").text((d: any) => { return d.data.name; });
@@ -476,11 +477,13 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     line = [],
                     lineNumber = 0,
                     lineHeight = 1.1, // ems
-                    overflow = false,
+                    wordcount  = 0,
+                    overflow   = false,
                     x = text.attr("x"),
                     y = text.attr("y"),
-                    width = parseFloat(text.attr("width")),
-                    height = parseFloat(text.attr("height")),
+                    v_align  = text.attr("v-align") == null ? vertical_alignment : text.attr("v-align"),
+                    width    = parseFloat(text.attr("width")),
+                    height   = parseFloat(text.attr("height")),
                     fontsize = parseFloat(text.attr("font-size").substring(0, text.attr("font-size").length - 2)),
                     dy = 0, 
                     tspan = text.text(null)
@@ -492,52 +495,46 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 while (word = words.pop()) {
                     // add a word to the line
                     line.push(word);
+                    wordcount++;
                     
                     // only update the text if we haven't already exceeded the max rows that will fit
-                    if (lineNumber * lineHeight * fontsize <= height) {
+                    if (lineNumber * lineHeight * fontsize <= height && !overflow) {
                         tspan.text(line.join(" "));
 
-                        // if the line is now too long to fit then remove the last added word
-                        if (tspan.node().getComputedTextLength() > width) {
-                            // remove the word that made it too long
+                        // if the current line is too long to fit then remove the last word added
+                        while (tspan.node().getComputedTextLength() > width && !overflow) {
+
+                            // remove the word that made the line too long
                             line.pop();
-                            tspan.text(line.join(" "));
+                            wordcount--;
+                            if (wordcount > 0) tspan.text(line.join(" "));
 
                             // if a single word is too long to fit, break it apart
-                            if (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
+                            if (wordcount == 0) {
                                 longline = tspan.text();
 
                                 // find the largest fraction of the word that will fit
                                 fraction = 1;
-                                while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
+                                while (tspan.node().getComputedTextLength() > width && tspan.text().length > 2) {
                                     fraction++;
                                     tspan.text(longline.substring(0, longline.length/fraction) + "-");
                                 }
 
-                                // create tspans for the remaining fractions of the word
-                                for (i=2; i <= fraction; i++) {
-                                    // add tspan if there is room
-                                    if ((lineNumber + 1) * lineHeight * fontsize <= height) {
-                                        tspan = text.append("tspan")
-                                                    .attr("x", x)
-                                                    .attr("y", y)
-                                                    .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                                                    .text(longline.substring((i - 1) * longline.length / fraction, i * longline.length / fraction) + (i < fraction ? "-" : ""));
-                                    }
-                                    else { overflow = true; }
-                                }
+                                // set the remainder of the long word to be the next word
+                                word = longline.substring(longline.length / fraction, longline.length);
                             }
 
                             // create a new line using the removed word
-                            if ((lineNumber + 1) * lineHeight * fontsize <= height) {
+                            if ((lineNumber + 2) * lineHeight * fontsize <= height && !overflow) {
                                 line = [word];
+                                wordcount = 1;
                                 tspan = text.append("tspan")
                                             .attr("x", x)
                                             .attr("y", y)
                                             .attr("dy", ++lineNumber * lineHeight + dy + "em")
                                             .text(word);
                                 
-                                // if last word is too long, break it apart
+                                // if we are on the last word and it is too long, break it apart
                                 if (words.length == 0 && tspan.node().getComputedTextLength() > width) {
                                     longline = tspan.text();
                                     fraction = 1;
@@ -566,9 +563,9 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 }
                 if (lineNumber > 0) {
                     var startDy;
-                    if (vertical_alignment == "top") startDy = 0;
-                    if (vertical_alignment == "center") startDy = -(lineNumber * (lineHeight / 2));
-                    if (vertical_alignment == "bottom") startDy = -(lineNumber * lineHeight);
+                    if (v_align == "top") startDy = 0;
+                    if (v_align == "center") startDy = -0.5 * lineNumber * lineHeight;
+                    if (v_align == "bottom") startDy = -lineNumber * lineHeight;
                     text.selectAll("tspan").attr("dy", (d, i) => startDy + lineHeight * i + "em");
                 }
             });
