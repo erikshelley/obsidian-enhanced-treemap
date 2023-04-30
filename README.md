@@ -40,6 +40,8 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 
 Treemaps can be customized in the plugins settings, in the options section within a treemap and in individual treemap cells.
 
+### Size & Shape Settings
+
 | Option              | Plugin Settings | Treemap Options | Treemap Cell |
 | ------------------- | --------------- | --------------- | ------------ |
 | Aspect Ratio        | X               | X               |              |
@@ -52,8 +54,6 @@ Treemaps can be customized in the plugins settings, in the options section withi
 | Cell Padding Size   | X               | X               |              |
 | Sort Cells by Size  | X               | X               |              |
 
-
-### Size & Shape Settings
 #### Treemap Aspect Ratio & Width
 #### Header Text Size
 #### Cell Text Size
@@ -64,9 +64,45 @@ Treemaps can be customized in the plugins settings, in the options section withi
 
 ## Alignment Settings
 
+| Option               | Plugin Settings | Treemap Options | Treemap Cell |
+| -------------------  | --------------- | --------------- | ------------ |
+| Header Alignment     | X               | X               | X            |
+| Horizontal Alignment | X               | X               | X            |
+| Vertical Alignment   | X               | X               | X            |
+
+#### Header Alignment
+#### Horizontal Alignment
+#### Vertical Alignment
+
 ## Color Settings
 
+| Option               | Plugin Settings | Treemap Options | Treemap Cell |
+| -------------------  | --------------- | --------------- | ------------ |
+| Border Color         | X               | X               | X            |
+| Header Text Color    | X               | X               | X            |
+| Text Color           | X               | X               | X            |
+| Cell Color           | X               | X               | X            |
+
+#### Border Color
+#### Header Text Color
+#### Text Color
+#### Cell Color
+
 ## Other Styling Settings
+
+| Option               | Plugin Settings | Treemap Options | Treemap Cell |
+| -------------------  | --------------- | --------------- | ------------ |
+| Show Headers         | X               | X               |              |
+| Show Values          | X               | X               |              |
+| Shading              | X               | X               |              |
+| Drop Shadows         | X               | X               |              |
+| Shadow Size          | X               | X               |              |
+
+#### Show Headers
+#### Show Values
+#### Shading
+#### Drop Shadows
+#### Shadow Size
 
 ## Releasing new releases
 
