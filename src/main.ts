@@ -89,7 +89,7 @@ const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
     // Other Styling Options
     shading:              true,
     shadow:               true,
-    shadow_size:          0,
+    shadow_size:          4,
     show_headers:         true,
     show_values:          false
 }

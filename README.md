@@ -38,71 +38,46 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 
 ## Options
 
-Treemaps can be customized in the plugins settings, in the options section within a treemap and in individual treemap cells.
+- Treemaps can be customized in the plugins settings
+- Plugin settings can be overridden for individual treemaps in the options section of a treemap
+- Some treemap options can be overridden for individual cells in the attributes of a cell
 
 ### Size & Shape Settings
 
-| Option              | Plugin Settings | Treemap Options | Treemap Cell |
-| ------------------- | --------------- | --------------- | ------------ |
-| Aspect Ratio        | X               | X               |              |
-| Fixed Width         | X               | X               |              |
-| Treemap Width       | X               | X               |              |
-| Header Text Size    | X               | X               | X            |
-| Cell Text Size      | X               | X               | X            |
-| Header Padding Size | X               | X               |              |
-| Text Padding Size   | X               | X               |              |
-| Cell Padding Size   | X               | X               |              |
-| Sort Cells by Size  | X               | X               |              |
-
-#### Treemap Aspect Ratio & Width
-#### Header Text Size
-#### Cell Text Size
-#### Header Padding Size
-#### Text Padding Size
-#### Cell Padding Size
-#### Sort Cells by Size
+| Plugin Setting      | Treemap Option | Cell Attribute | Default |
+| Aspect Ratio        | aspect_ratio   |                | "1:1"   |
+| Fixed Width         | fixed_width    |                | false   |
+| Treemap Width       | width          |                | 500     |
+| Header Text Size    | header_size    | text_size      | 16      |
+| Cell Text Size      | text_size      | text_size      | 13      |
+| Header Padding Size | header_padding |                | 8       |
+| Text Padding Size   | text_padding   |                | 8       |
+| Cell Padding Size   | cell_padding   |                | 8       |
+| Sort Cells by Size  | sort           |                | true    |
 
 ## Alignment Settings
 
-| Option               | Plugin Settings | Treemap Options | Treemap Cell |
-| -------------------  | --------------- | --------------- | ------------ |
-| Header Alignment     | X               | X               | X            |
-| Horizontal Alignment | X               | X               | X            |
-| Vertical Alignment   | X               | X               | X            |
-
-#### Header Alignment
-#### Horizontal Alignment
-#### Vertical Alignment
+| Plugin Setting       | Treemap Option       | Cell Attribute       | Default |
+| Header Alignment     | header_alignment     | header_alignment     | "left"  |
+| Horizontal Alignment | horizontal_alignment | horizontal_alignment | "left"  |
+| Vertical Alignment   | vertical_alignment   | vertical_alignment   | "top"   |
 
 ## Color Settings
 
-| Option               | Plugin Settings | Treemap Options | Treemap Cell |
-| -------------------  | --------------- | --------------- | ------------ |
-| Border Color         | X               | X               | X            |
-| Header Text Color    | X               | X               | X            |
-| Text Color           | X               | X               | X            |
-| Cell Color           | X               | X               | X            |
-
-#### Border Color
-#### Header Text Color
-#### Text Color
-#### Cell Color
+| Plugin Setting    | Treemap Option | Cell Attribute | Default             |
+| Border Color      | border_color   | border_color   | rsla(0, 0, 0, 0.5)  |
+| Header Text Color | header_color   | header_color   | rsla(0, 0, 0.9, 1)  |
+| Text Color        | text_color     | text_color     | rsla(0, 0, 0.8, 1)  |
+| Cell Color        | fill           | fill           | rsla(0, 0, 0.25, 1) |
 
 ## Other Styling Settings
 
-| Option               | Plugin Settings | Treemap Options | Treemap Cell |
-| -------------------  | --------------- | --------------- | ------------ |
-| Show Headers         | X               | X               |              |
-| Show Values          | X               | X               |              |
-| Shading              | X               | X               |              |
-| Drop Shadows         | X               | X               |              |
-| Shadow Size          | X               | X               |              |
-
-#### Show Headers
-#### Show Values
-#### Shading
-#### Drop Shadows
-#### Shadow Size
+| Plugin Setting | Treemap Option | Cell Attribute | Default |
+| Show Headers   | show_headers   |                | true    |
+| Show Values    | show_values    |                | false   |
+| Shading        | shading        |                | true    |
+| Drop Shadows   | shadows        |                | true    |
+| Shadow Size    | shadow_size    |                | 4       |
 
 ## Releasing new releases
 
