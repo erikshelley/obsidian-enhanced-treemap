@@ -17,6 +17,8 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 ```
 ~~~
 
+![image](./images/Simple-Example.png)
+
 ## Releasing new releases
 
 - Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
