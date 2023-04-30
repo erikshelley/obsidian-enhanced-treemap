@@ -5,7 +5,7 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 - [Simple Example](#simple-example)
 - [Complex Example](#complex-example)
 - [Options](#options)
-    - [Size & Shape Settings](#size-&-shape-settings)
+    - [Size & Shape Settings](#size-&amp;-shape-settings)
     - [Alignment Settings](#alignment-settings)
     - [Color Settings](#color-settings)
     - [Other Styling Settings](#other-styling-settings)
