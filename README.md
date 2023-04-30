@@ -5,6 +5,14 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 ## A Simple Example
 
 ```json
+{
+"type": "enhancedtreemap",
+"name": "Simple Example",
+"children": [
+    { "name": "Item 1" },
+    { "name": "Item 2" }
+]
+}
 ```
 
 ## Releasing new releases
