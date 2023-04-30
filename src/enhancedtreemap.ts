@@ -17,7 +17,7 @@ export default class EnhancedTreeMap {
             ctx.addChild(renderer);
         });
 
-        this.plugin.app.workspace.onLayoutReady(() => {
+        await this.plugin.app.workspace.onLayoutReady(() => {
             renderer.renderEnhancedTreeMap();
         });
     }
@@ -41,7 +41,9 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     aspect_h:             float;
     fixed_width:          bool;
     width:                float;
-    padding:              float;
+    cell_padding:         float;
+    text_padding:         float;
+    head_padding:         float;
     text_size:            float;
     header_size:          float;
     sort:                 bool;
@@ -71,9 +73,10 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
 
     // Other Styling Options
     shading:              bool;
-    shadow:               bool;
+    shadows:              bool;
     shadow_size:          float;
     show_headers:         bool;
+    show_values:          bool;
 
     constructor(element: HTMLElement, enhancedtreemap: EnhancedTreeMap, ctx: MarkdownPostProcessorContext, settings: array) {
         super(element);
@@ -92,7 +95,9 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         this.fixed_width          = settings.fixed_width;
         this.width                = settings.width;
         this.header_size          = settings.header_size;
-        this.padding              = settings.padding;
+        this.cell_padding         = settings.cell_padding;
+        this.text_padding         = settings.text_padding;
+        this.head_padding         = settings.head_padding;
         this.text_size            = settings.text_size;
         this.sort                 = settings.sort;
 
@@ -121,9 +126,10 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
 
         // Other Styling Options
         this.shading              = settings.shading;
-        this.shadow               = settings.shadow;
+        this.shadows              = settings.shadows;
         this.shadow_size          = settings.shadow_size;
         this.show_headers         = settings.show_headers;
+        this.show_values          = settings.show_values;
 
     }
 
@@ -210,8 +216,8 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 if (option.shading != null) 
                     this.shading = this.verifyOption(option.shading, "shading", "bool", null, null, null);
 
-                if (option.shadow != null) 
-                    this.shadow = this.verifyOption(option.shadow, "shadow", "bool", null, null, null);
+                if (option.shadows != null) 
+                    this.shadows = this.verifyOption(option.shadows, "shadows", "bool", null, null, null);
                 if (option.shadow_size != null) 
                     this.shadow_size = this.verifyOption(option.shadow_size, "shadow_size", "float", 0, null, null);
 
@@ -227,8 +233,12 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                 if (this.show_headers == false) 
                     this.header_size = 0;
 
-                if (option.padding != null) 
-                    this.padding = this.verifyOption(option.padding, "padding", "float", 0, null, null);
+                if (option.show_values != null) 
+                    this.show_values = this.verifyOption(option.show_values, "show_values", "bool", null, null, null);
+
+                if (option.cell_padding != null) this.cell_padding = this.verifyOption(option.cell_padding, "cell_padding", "float", 0, null, null);
+                if (option.text_padding != null) this.text_padding = this.verifyOption(option.text_padding, "text_padding", "float", 0, null, null);
+                if (option.header_padding != null) this.head_padding = this.verifyOption(option.header_padding, "header_padding", "float", 0, null, null);
 
                 if (option.aspect_ratio != null) {
                     var aspect = 1;
@@ -266,7 +276,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
 
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         this.uuid = Math.floor(Math.random() * 100000);
-        const svg_id = "enhancedtreemap_" + this.uuid;
+        var svg_id = "enhancedtreemap_" + this.uuid;
         this.svg_id = svg_id;
         svg.setAttribute("id", svg_id);
 
@@ -287,7 +297,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
 
         const radialGradient = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
-        radialGradient.setAttribute("id", "radialgradient" + this.uuid);
+        radialGradient.setAttribute("id", "radialgradient_" + this.uuid);
         radialGradient.setAttribute("cx", "25%");
         radialGradient.setAttribute("cy", "25%");
         radialGradient.setAttribute("r", "100%");
@@ -304,7 +314,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         svg.appendChild(defs);
 
         const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-        filter.setAttribute("id", "shadow" + this.uuid);
+        filter.setAttribute("id", "shadow_" + this.uuid);
         filter.setAttribute("color-interpolation-filters", "sRGB");
 
         const feDropShadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
@@ -318,9 +328,14 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         return wrapper;
     }
 
-    renderEnhancedTreeMap() {
+    async renderEnhancedTreeMap() {
         if (this.error) return;
         var svg_element = document.getElementById(this.svg_id);
+
+        // would be nice to have a better solution here, sometimes this function is called before the svg is in the DOM
+        if (svg_element == null) await new Promise(r => setTimeout(r, 100));
+        svg_element = document.getElementById(this.svg_id);
+
         var width = this.svg_width;
         var height = this.svg_height;
         var scale = 1;
@@ -347,7 +362,9 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
 
         var svg = d3.select(this.svg).append("g");
 
-        var padding = this.padding * scale;
+        var cell_padding = this.cell_padding * scale;
+        var text_padding = this.text_padding * scale;
+        var head_padding = this.head_padding * scale;
         var text_size = this.text_size * scale;
         var header_size = this.header_size * scale;
 
@@ -355,9 +372,9 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         var treemapLayout = d3.treemap()
             .tile(d3.treemapSquarify.ratio(1))
             .size([width, height])
-            .paddingOuter(padding)
-            .paddingTop(this.show_headers ? header_size + 4 * padding : padding)
-            .paddingInner(padding)
+            .paddingOuter(cell_padding)
+            .paddingTop(this.show_headers ? header_size + 2 * head_padding : cell_padding)
+            .paddingInner(cell_padding)
             (nodes);
 
         // decendants instead of leaves shows all nodes, not just the leaves
@@ -383,7 +400,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         d.data.fill.l == null ? this.fill_l : d.data.fill.l, 
                         d.data.fill.a == null ? this.fill_a : d.data.fill.a)
                 })
-                .attr("filter", this.shadow ? "url(#shadow" + this.uuid + ")" : "");
+                .attr("filter", this.shadows ? "url(#shadow_" + this.uuid + ")" : "");
 
         if (this.shading) {
             svg.selectAll("highlight").data(nodes.descendants()).enter()
@@ -392,27 +409,27 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                     .attr("y",      (d: any) => { return d.y0; })
                     .attr("width",  (d: any) => { return d.x1 - d.x0; })
                     .attr("height", (d: any) => { return d.y1 - d.y0; })
-                    .attr("fill",   "url(#radialgradient" + this.uuid + ")")
+                    .attr("fill",   "url(#radialgradient_" + this.uuid + ")")
                     .append("title").text((d: any) => { return d.data.name; });
         }
 
         svg.selectAll("text").data(nodes.leaves()).enter()
             .append("text")
                 .attr("x",           (d: any) => { 
-                        if (d.data.horizontal_alignment == "left"   || (d.data.horizontal_alignment == null && this.horizontal_alignment == "left"))   return d.x0 + padding; 
+                        if (d.data.horizontal_alignment == "left"   || (d.data.horizontal_alignment == null && this.horizontal_alignment == "left"))   return d.x0 + text_padding; 
                         if (d.data.horizontal_alignment == "center" || (d.data.horizontal_alignment == null && this.horizontal_alignment == "center")) return d.x0 + 0.5 * (d.x1 - d.x0); 
-                        if (d.data.horizontal_alignment == "right"  || (d.data.horizontal_alignment == null && this.horizontal_alignment == "right"))  return d.x1 - padding; 
+                        if (d.data.horizontal_alignment == "right"  || (d.data.horizontal_alignment == null && this.horizontal_alignment == "right"))  return d.x1 - text_padding; 
                 })
                 .attr("y",           (d: any) => { 
-                    if (d.data.vertical_alignment == "top"     || (d.data.vertical_alignment == null && this.vertical_alignment == "top"))    return d.y0 + padding + textsize(d, scale, text_size);
+                    if (d.data.vertical_alignment == "top"     || (d.data.vertical_alignment == null && this.vertical_alignment == "top"))    return d.y0 + text_padding + textsize(d, scale, text_size);
                     if (d.data.vertical_alignment == "center"  || (d.data.vertical_alignment == null && this.vertical_alignment == "center")) return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textsize(d, scale, text_size);
-                    if (d.data.vertical_alignment == "bottom"  || (d.data.vertical_alignment == null && this.vertical_alignment == "bottom")) return d.y1 - padding;
+                    if (d.data.vertical_alignment == "bottom"  || (d.data.vertical_alignment == null && this.vertical_alignment == "bottom")) return d.y1 - text_padding;
                 })
                 .attr("v-align",     (d: any) => { return d.data.vertical_alignment })
                 .attr("left",        (d: any) => { return d.x0; })
                 .attr("top",         (d: any) => { return d.y0; })
-                .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * padding; })
-                .attr("height",      (d: any) => { return d.y1 - d.y0 - 2 * padding; })
+                .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * text_padding; })
+                .attr("height",      (d: any) => { return d.y1 - d.y0 - 2 * text_padding; })
                 .attr("text-anchor", (d: any) => {
                       if (d.data.horizontal_alignment == "left"   || (d.data.horizontal_alignment == null && this.horizontal_alignment == "left"))   return "start";
                       if (d.data.horizontal_alignment == "center" || (d.data.horizontal_alignment == null && this.horizontal_alignment == "center")) return "middle";
@@ -427,7 +444,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         d.data.text_color.a == null ? this.text_a : d.data.text_color.a)
                 })
                 .attr("opacity",     (d: any) => { return ((d.y1 - d.y0 < textsize(d, scale, text_size)) || (d.x1 - d.x0 < 2 * textsize(d, scale, text_size))) ? 0 : 1 })
-                .text((d: any) => { return d.data.name; })
+                .text((d: any) => { return this.show_values ? (d.data.value || 1) + " " + d.data.name : d.data.name; })
                 .call(wrap)
                 .append("title").text((d: any) => { return d.data.name; });
 
@@ -437,12 +454,12 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
             svg.selectAll("label").data(nodes.descendants().filter((d: any) => { return d.children; })).enter()
                 .append("text")
                     .attr("x",           (d: any) => { 
-                            if (d.data.header_alignment == "left"   || (d.data.header_alignment == null && this.header_alignment == "left"))   return d.x0 + 1.5 * padding; 
+                            if (d.data.header_alignment == "left"   || (d.data.header_alignment == null && this.header_alignment == "left"))   return d.x0 + 1.0 * head_padding; 
                             if (d.data.header_alignment == "center" || (d.data.header_alignment == null && this.header_alignment == "center")) return d.x0 + 0.5 * (d.x1 - d.x0); 
-                            if (d.data.header_alignment == "right"  || (d.data.header_alignment == null && this.header_alignment == "right"))  return d.x1 - 1.5 * padding; 
+                            if (d.data.header_alignment == "right"  || (d.data.header_alignment == null && this.header_alignment == "right"))  return d.x1 - 1.0 * head_padding; 
                     })
-                    .attr("y",           (d: any) => { return d.y0 + 2 * padding + 0.8 * textsize(d, scale, header_size) })
-                    .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * padding; })
+                    .attr("y",           (d: any) => { return d.y0 + head_padding + 0.8 * textsize(d, scale, header_size) })
+                    .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * head_padding; })
                     .attr("text-anchor", (d: any) => {
                           if (d.data.header_alignment == "left"   || (d.data.header_alignment == null && this.header_alignment == "left"))   return "start";
                           if (d.data.header_alignment == "center" || (d.data.header_alignment == null && this.header_alignment == "center")) return "middle";
@@ -456,7 +473,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                             d.data.text_color.l == null ? this.header_s : d.data.text_color.l, 
                             d.data.text_color.a == null ? this.header_l : d.data.text_color.a)
                     })
-                    .attr("opacity",     (d: any) => { return ((header_size + padding < textsize(d, scale, header_size)) || (d.x1 - d.x0 < textsize(d, scale, header_size))) ? 0 : 1 })
+                    .attr("opacity",     (d: any) => { return ((header_size + head_padding < textsize(d, scale, header_size)) || (d.x1 - d.x0 < textsize(d, scale, header_size))) ? 0 : 1 })
                     .text((d: any) => { return d.data.name; })
                     .call(ellipse)
                     .append("title").text((d: any) => { return d.data.name; });
@@ -543,7 +560,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                                         tspan.text(longline.substring(0, longline.length/fraction) + "-");
                                     }
                                     for (i=2; i <= fraction; i++) {
-                                        if ((lineNumber + 1) * lineHeight * fontsize <= height) {
+                                        if ((lineNumber + 2) * lineHeight * fontsize <= height) {
                                             tspan = text.append("tspan")
                                                         .attr("x", x)
                                                         .attr("y", y)

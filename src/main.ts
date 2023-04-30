@@ -9,7 +9,9 @@ interface EnhancedTreemapSettings {
     fixed_width:          bool;
     width:                float;
     header_size:          float;
-    padding:              float;
+    cell_padding:         float;
+    text_padding:         float;
+    head_padding:         float;
     text_size:            float;
     sort:                 bool;
 
@@ -41,6 +43,7 @@ interface EnhancedTreemapSettings {
     shadow:               bool;
     shadow_size:          float;
     show_headers:         bool;
+    show_values:          bool;
 }
 
 const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
@@ -50,7 +53,9 @@ const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
     aspect_h:             1,
     fixed_width:          false,
     width:                500,
-    padding:              8,
+    cell_padding:         8,
+    text_padding:         8,
+    head_padding:         8,
     sort:                 true,
     text_size:            13,
     header_size:          16,
@@ -85,7 +90,8 @@ const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
     shading:              true,
     shadow:               true,
     shadow_size:          0,
-    show_headers:         true
+    show_headers:         true,
+    show_values:          false
 }
 
 export default class EnhancedTreemapPlugin extends Plugin {
@@ -220,13 +226,37 @@ class SampleSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Padding Size')
-            .setDesc('Default Padding Size')
+            .setName('Cell Padding Size')
+            .setDesc('Default Padding Size Around Cells')
             .addText(text => text
-                .setValue(this.plugin.settings.padding.toString())
+                .setValue(this.plugin.settings.cell_padding.toString())
                 .onChange(async (value) => {
                     if (value > 0) {
-                        this.plugin.settings.padding = value;
+                        this.plugin.settings.cell_padding = value;
+                        await this.plugin.saveSettings();
+                    }
+                }));
+
+        new Setting(containerEl)
+            .setName('Text Padding Size')
+            .setDesc('Default Text Padding Size')
+            .addText(text => text
+                .setValue(this.plugin.settings.text_padding.toString())
+                .onChange(async (value) => {
+                    if (value > 0) {
+                        this.plugin.settings.text_padding = value;
+                        await this.plugin.saveSettings();
+                    }
+                }));
+
+        new Setting(containerEl)
+            .setName('Header Padding Size')
+            .setDesc('Default Header Padding Size')
+            .addText(text => text
+                .setValue(this.plugin.settings.head_padding.toString())
+                .onChange(async (value) => {
+                    if (value > 0) {
+                        this.plugin.settings.head_padding = value;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -402,6 +432,16 @@ class SampleSettingTab extends PluginSettingTab {
             .addToggle((t) => {
                 t.setValue(this.plugin.settings.show_headers).onChange(async (v) => {
                     this.plugin.settings.show_headers = v;
+                    await this.plugin.saveSettings();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName("Show Values")
+            .setDesc("Show Values by Default")
+            .addToggle((t) => {
+                t.setValue(this.plugin.settings.show_values).onChange(async (v) => {
+                    this.plugin.settings.show_values = v;
                     await this.plugin.saveSettings();
                 });
             });
