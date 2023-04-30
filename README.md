@@ -2,9 +2,24 @@
 
 This is a data visualization plugin for [Obsidian](https://obsidian.md), based on [D3.js](https://d3js.org), that allows for the creation of [Nested Treemaps](https://observablehq.com/@d3/nested-treemap).
 
-## A Simple Example
+- [Simple Example](#simple-example)
+- [Complex Example](#complex-example)
+- [Options](#options)
+    - [Size & Shape Settings](#size-&-shape-settings)
+    - [Alignment Settings](#alignment-settings)
+    - [Color Settings](#color-settings)
+    - [Other Styling Settings](#other-styling-settings)
 
-~~~markdown
+## Simple Example
+
+After installing and enabling the plugin, treemaps can be added to notes by creating json code blocks.
+- The code block type must be json.
+- The code block contents must be valid json.
+- The first two rows must be as shown below with an opening bracket on the first row and **"type": "enhancedtreemap",** on the second row.
+- Each cell must have a "name" element. The value for this element will be shown as the text for the cell.
+- The children for a cell must be contained in a "children" array.
+
+<pre>
 ```json
 {
 "type": "enhancedtreemap",
@@ -15,9 +30,31 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 ]
 }
 ```
-~~~
+</pre>
 
-![image](./images/Simple-Example.png)
+![Simple Example](./images/Simple-Example.png)
+
+## Complex Example
+
+
+## Options
+
+Treemaps can be customized within the code block or the plugin settings.
+
+### Size & Shape Settings
+#### Treemap Aspect Ratio & Width
+#### Header Text Size
+#### Text Size
+#### Cell Padding Size
+#### Text Padding Size
+#### Header Padding Size
+#### Sort Cells by Size
+
+## Alignment Settings
+
+## Color Settings
+
+## Other Styling Settings
 
 ## Releasing new releases
 
