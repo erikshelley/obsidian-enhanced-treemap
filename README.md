@@ -4,6 +4,7 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 
 ## A Simple Example
 
+~~~markdown
 ```json
 {
 "type": "enhancedtreemap",
@@ -14,6 +15,7 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 ]
 }
 ```
+~~~
 
 ## Releasing new releases
 
