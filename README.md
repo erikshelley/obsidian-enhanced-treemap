@@ -45,6 +45,7 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 ### Size & Shape Settings
 
 | Plugin Setting      | Treemap Option | Cell Attribute | Default |
+| --------------      | -------------- | -------------- | ------- |
 | Aspect Ratio        | aspect_ratio   |                | "1:1"   |
 | Fixed Width         | fixed_width    |                | false   |
 | Treemap Width       | width          |                | 500     |
@@ -58,6 +59,7 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 ## Alignment Settings
 
 | Plugin Setting       | Treemap Option       | Cell Attribute       | Default |
+| --------------       | --------------       | --------------       | ------- |
 | Header Alignment     | header_alignment     | header_alignment     | "left"  |
 | Horizontal Alignment | horizontal_alignment | horizontal_alignment | "left"  |
 | Vertical Alignment   | vertical_alignment   | vertical_alignment   | "top"   |
@@ -65,6 +67,7 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 ## Color Settings
 
 | Plugin Setting    | Treemap Option | Cell Attribute | Default             |
+| --------------    | -------------- | -------------- | -------             |
 | Border Color      | border_color   | border_color   | rsla(0, 0, 0, 0.5)  |
 | Header Text Color | header_color   | header_color   | rsla(0, 0, 0.9, 1)  |
 | Text Color        | text_color     | text_color     | rsla(0, 0, 0.8, 1)  |
@@ -73,6 +76,7 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 ## Other Styling Settings
 
 | Plugin Setting | Treemap Option | Cell Attribute | Default |
+| -------------- | -------------- | -------------- | ------- |
 | Show Headers   | show_headers   |                | true    |
 | Show Values    | show_values    |                | false   |
 | Shading        | shading        |                | true    |
