@@ -31,10 +31,13 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 ```
 </pre>
 
-![Simple Example](./images/Simple-Example.png)
+![Simple Example Image](./examples/Simple-Example.png)
 
 ## Complex Example
 
+[Complex Example JSON](examples/Complex-Example.md)
+
+![Complex Example Image](./examples/Complex-Example.png)
 
 ## Options
 
@@ -42,21 +45,29 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 - Plugin settings can be overridden for individual treemaps in the options section of a treemap
 - Some treemap options can be overridden for individual cells in the attributes of a cell
 
-### Size & Shape Settings
+### Size, Shape & Content
 
 | Plugin Setting      | Treemap Option | Cell Attribute | Default |
 | --------------      | -------------- | -------------- | ------- |
 | Aspect Ratio        | aspect_ratio   |                | "1:1"   |
 | Fixed Width         | fixed_width    |                | false   |
 | Treemap Width       | width          |                | 500     |
+| Sort Cells by Size  | sort           |                | true    |
+| Show Headers        | show_headers   |                | true    |
 | Header Text Size    | header_size    | text_size      | 16      |
 | Cell Text Size      | text_size      | text_size      | 13      |
+| Show Values         | show_values    |                | false   |
+
+### Padding
+
+| Plugin Setting      | Treemap Option | Cell Attribute | Default |
+| --------------      | -------------- | -------------- | ------- |
 | Header Padding Size | header_padding |                | 8       |
 | Text Padding Size   | text_padding   |                | 8       |
 | Cell Padding Size   | cell_padding   |                | 8       |
-| Sort Cells by Size  | sort           |                | true    |
 
-## Alignment Settings
+
+### Alignment
 
 | Plugin Setting       | Treemap Option       | Cell Attribute       | Default |
 | --------------       | --------------       | --------------       | ------- |
@@ -64,24 +75,22 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 | Horizontal Alignment | horizontal_alignment | horizontal_alignment | "left"  |
 | Vertical Alignment   | vertical_alignment   | vertical_alignment   | "top"   |
 
-## Color Settings
+### Color
 
 | Plugin Setting    | Treemap Option | Cell Attribute | Default             |
 | --------------    | -------------- | -------------- | -------             |
 | Border Color      | border_color   | border_color   | rsla(0, 0, 0, 0.5)  |
-| Header Text Color | header_color   | header_color   | rsla(0, 0, 0.9, 1)  |
+| Header Text Color | header_color   | text_color     | rsla(0, 0, 0.9, 1)  |
 | Text Color        | text_color     | text_color     | rsla(0, 0, 0.8, 1)  |
 | Cell Color        | fill           | fill           | rsla(0, 0, 0.25, 1) |
 
-## Other Styling Settings
+### Shading & Shadows
 
-| Plugin Setting | Treemap Option | Cell Attribute | Default |
-| -------------- | -------------- | -------------- | ------- |
-| Show Headers   | show_headers   |                | true    |
-| Show Values    | show_values    |                | false   |
-| Shading        | shading        |                | true    |
-| Drop Shadows   | shadows        |                | true    |
-| Shadow Size    | shadow_size    |                | 4       |
+| Plugin Setting   | Treemap Option | Cell Attribute | Default |
+| --------------   | -------------- | -------------- | ------- |
+| Shading          | shading        | shading        | true    |
+| Shadows          | shadows        | shadows        | true    |
+| Shadow Size      | shadow_size    |                | 4       |
 
 ## Releasing new releases
 

@@ -304,10 +304,10 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
 
         const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
         stop1.setAttribute("offset", "0%");
-        stop1.setAttribute("stop-color", "hsla(0, 0%, 80%, 10%)");
+        stop1.setAttribute("stop-color", "hsla(0, 0%, 80%, 20%)");
         const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
         stop2.setAttribute("offset", "100%");
-        stop2.setAttribute("stop-color", "hsla(0, 0%, 20%, 10%)");
+        stop2.setAttribute("stop-color", "hsla(0, 0%, 20%, 20%)");
         radialGradient.appendChild(stop1);
         radialGradient.appendChild(stop2);
         defs.appendChild(radialGradient);
@@ -333,8 +333,8 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         var svg_element = document.getElementById(this.svg_id);
 
         // would be nice to have a better solution here, sometimes this function is called before the svg is in the DOM
-        if (svg_element == null) await new Promise(r => setTimeout(r, 100));
-        svg_element = document.getElementById(this.svg_id);
+        //if (svg_element == null) await new Promise(r => setTimeout(r, 100));
+        //svg_element = document.getElementById(this.svg_id);
 
         var width = this.svg_width;
         var height = this.svg_height;
@@ -400,18 +400,22 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
                         d.data.fill.l == null ? this.fill_l : d.data.fill.l, 
                         d.data.fill.a == null ? this.fill_a : d.data.fill.a)
                 })
-                .attr("filter", this.shadows ? "url(#shadow_" + this.uuid + ")" : "");
+                .attr("filter", (d: any) => { return d.data.shadows == null ?
+                    (this.shadows ? "url(#shadow_" + this.uuid + ")" : "") : 
+                    (d.data.shadows ? "url(#shadow_" + this.uuid + ")" : "") 
+                });
 
-        if (this.shading) {
-            svg.selectAll("highlight").data(nodes.descendants()).enter()
-                .append("rect")
-                    .attr("x",      (d: any) => { return d.x0; })
-                    .attr("y",      (d: any) => { return d.y0; })
-                    .attr("width",  (d: any) => { return d.x1 - d.x0; })
-                    .attr("height", (d: any) => { return d.y1 - d.y0; })
-                    .attr("fill",   "url(#radialgradient_" + this.uuid + ")")
-                    .append("title").text((d: any) => { return d.data.name; });
-        }
+        svg.selectAll("highlight").data(nodes.descendants()).enter()
+            .append("rect")
+                .attr("x",      (d: any) => { return d.x0; })
+                .attr("y",      (d: any) => { return d.y0; })
+                .attr("width",  (d: any) => { return d.x1 - d.x0; })
+                .attr("height", (d: any) => { return d.y1 - d.y0; })
+                .attr("fill",   (d: any) => { return d.data.shading == null ?
+                    (this.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0)) :
+                    (d.data.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0))
+                })
+                .append("title").text((d: any) => { return d.data.name; });
 
         svg.selectAll("text").data(nodes.leaves()).enter()
             .append("text")
