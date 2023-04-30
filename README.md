@@ -5,7 +5,7 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 - [Simple Example](#simple-example)
 - [Complex Example](#complex-example)
 - [Options](#options)
-    - [Size & Shape Settings](#size-&amp;-shape-settings)
+    - [Size & Shape Settings](#size--shape-settings)
     - [Alignment Settings](#alignment-settings)
     - [Color Settings](#color-settings)
     - [Other Styling Settings](#other-styling-settings)
@@ -13,11 +13,10 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 ## Simple Example
 
 After installing and enabling the plugin, treemaps can be added to notes by creating json code blocks.
-- The code block type must be json.
-- The code block contents must be valid json.
-- The first two rows must be as shown below with an opening bracket on the first row and **"type": "enhancedtreemap",** on the second row.
-- Each cell must have a "name" element. The value for this element will be shown as the text for the cell.
-- The children for a cell must be contained in a "children" array.
+- Only json code blocks are checked.
+- The first two rows inside the code block must be exactly as shown below.
+- Each cell must have a **"name"** element. The value for this element will be shown as the text for the cell.
+- The children for a cell must be contained in a **"children"** array.
 
 <pre>
 ```json
@@ -39,15 +38,28 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 
 ## Options
 
-Treemaps can be customized within the code block or the plugin settings.
+Treemaps can be customized in the plugins settings, in the options section within a treemap and in individual treemap cells.
+
+| Option              | Plugin Settings | Treemap Options | Treemap Cell |
+| ------------------- | --------------- | --------------- | ------------ |
+| Aspect Ratio        | X               | X               |              |
+| Fixed Width         | X               | X               |              |
+| Treemap Width       | X               | X               |              |
+| Header Text Size    | X               | X               | X            |
+| Cell Text Size      | X               | X               | X            |
+| Header Padding Size | X               | X               |              |
+| Text Padding Size   | X               | X               |              |
+| Cell Padding Size   | X               | X               |              |
+| Sort Cells by Size  | X               | X               |              |
+
 
 ### Size & Shape Settings
 #### Treemap Aspect Ratio & Width
 #### Header Text Size
-#### Text Size
-#### Cell Padding Size
-#### Text Padding Size
+#### Cell Text Size
 #### Header Padding Size
+#### Text Padding Size
+#### Cell Padding Size
 #### Sort Cells by Size
 
 ## Alignment Settings
