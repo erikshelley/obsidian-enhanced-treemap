@@ -3,7 +3,7 @@
 This is a data visualization plugin for [Obsidian](https://obsidian.md), based on [D3.js](https://d3js.org), that allows for the creation of [Nested Treemaps](https://observablehq.com/@d3/nested-treemap).
 
 - [Simple Example](#simple-example)
-- [Complex Example](#complex-example)
+- [Settings](#settings)
 - [Options](#options)
     - [Size & Shape Settings](#size--shape-settings)
     - [Alignment Settings](#alignment-settings)
@@ -33,64 +33,11 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 
 ![Simple Example Image](./examples/Simple-Example.png)
 
-## Complex Example
+## Settings
 
-[Complex Example JSON](examples/Complex-Example.md)
+[Settings JSON](examples/Settings.md)
 
-![Complex Example Image](./examples/Complex-Example.png)
-
-## Options
-
-- Treemaps can be customized in the plugins settings
-- Plugin settings can be overridden for individual treemaps in the options section of a treemap
-- Some treemap options can be overridden for individual cells in the attributes of a cell
-
-### Size, Shape & Content
-
-| Plugin Setting      | Treemap Option | Cell Attribute | Default |
-| --------------      | -------------- | -------------- | ------- |
-| Aspect Ratio        | aspect_ratio   |                | "1:1"   |
-| Fixed Width         | fixed_width    |                | false   |
-| Treemap Width       | width          |                | 500     |
-| Sort Cells by Size  | sort           |                | true    |
-| Show Headers        | show_headers   |                | true    |
-| Header Text Size    | header_size    | text_size      | 16      |
-| Cell Text Size      | text_size      | text_size      | 13      |
-| Show Values         | show_values    |                | false   |
-
-### Padding
-
-| Plugin Setting      | Treemap Option | Cell Attribute | Default |
-| --------------      | -------------- | -------------- | ------- |
-| Header Padding Size | header_padding |                | 8       |
-| Text Padding Size   | text_padding   |                | 8       |
-| Cell Padding Size   | cell_padding   |                | 8       |
-
-
-### Alignment
-
-| Plugin Setting       | Treemap Option       | Cell Attribute       | Default |
-| --------------       | --------------       | --------------       | ------- |
-| Header Alignment     | header_alignment     | header_alignment     | "left"  |
-| Horizontal Alignment | horizontal_alignment | horizontal_alignment | "left"  |
-| Vertical Alignment   | vertical_alignment   | vertical_alignment   | "top"   |
-
-### Color
-
-| Plugin Setting    | Treemap Option | Cell Attribute | Default             |
-| --------------    | -------------- | -------------- | -------             |
-| Border Color      | border_color   | border_color   | rsla(0, 0, 0, 0.5)  |
-| Header Text Color | header_color   | text_color     | rsla(0, 0, 0.9, 1)  |
-| Text Color        | text_color     | text_color     | rsla(0, 0, 0.8, 1)  |
-| Cell Color        | fill           | fill           | rsla(0, 0, 0.25, 1) |
-
-### Shading & Shadows
-
-| Plugin Setting   | Treemap Option | Cell Attribute | Default |
-| --------------   | -------------- | -------------- | ------- |
-| Shading          | shading        | shading        | true    |
-| Shadows          | shadows        | shadows        | true    |
-| Shadow Size      | shadow_size    |                | 4       |
+![Settings Image](./examples/Settings.png)
 
 ## Releasing new releases
 
