@@ -22,10 +22,10 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 ```json
 {
 "type": "enhancedtreemap",
-"name": "Simple Example",
+"name": "Header",
 "children": [
-    { "name": "Item 1" },
-    { "name": "Item 2" }
+    { "name": "Cell 1" },
+    { "name": "Cell 2" }
 ]
 }
 ```

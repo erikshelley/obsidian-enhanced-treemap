@@ -11,7 +11,7 @@
 	{ "sort_by_value": false },
 	{ "cell_padding": 6 },
 	{ "text_padding": 6 },
-	{ "h_text_padding": 6 },
+	{ "h_text_padding": 8 },
 	{ "text_size": 11 },
 	{ "h_text_size": 11 },
 	{ "text_color": { "l": 0.7 } },
