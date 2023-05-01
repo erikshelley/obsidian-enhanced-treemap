@@ -17,8 +17,11 @@ The root element of the JSON code block must contain an element "type": "enhance
 {
     "type": "enhancedtreemap",
     "name": "Header",
+    "settings": [
+        { "aspect_ratio": "3:1" }
+    ],
     "children": [
-        { "name": "Cell 1" },
+        { "name": "Cell 1", "value": 2 },
         { "name": "Cell 2" }
     ]
 }
@@ -29,7 +32,7 @@ The root element of the JSON code block must contain an element "type": "enhance
 
 ## Settings
 
-The treemap below describes all of the available settings for the Enhanced Treemap plugin. Here is the [JSON code block](example/Settings.md) used to create it.
+The treemap below describes all of the available settings for the Enhanced Treemap plugin. Here is the [JSON code block](examples/Settings.md) used to create it.
 
 ![Settings Image](./examples/Settings.png)
 
