@@ -1,22 +1,16 @@
 # Obsidian Enhanced Treemap Plugin
 
 This is a data visualization plugin for [Obsidian](https://obsidian.md), based on [D3.js](https://d3js.org), that allows for the creation of [Nested Treemaps](https://observablehq.com/@d3/nested-treemap).
+Treemaps are a useful way to visualize hierarchical data in a very compact form.
+Normally treemaps only show text for the leaves of the tree, however nested treemaps also show text for the branches.
 
 - [Simple Example](#simple-example)
 - [Settings](#settings)
-- [Options](#options)
-    - [Size & Shape Settings](#size--shape-settings)
-    - [Alignment Settings](#alignment-settings)
-    - [Color Settings](#color-settings)
-    - [Other Styling Settings](#other-styling-settings)
 
 ## Simple Example
 
-After installing and enabling the plugin, treemaps can be added to notes by creating json code blocks.
-- Only json code blocks are checked.
-- The first two rows inside the code block must be exactly as shown below.
-- Each cell must have a **"name"** element. The value for this element will be shown as the text for the cell.
-- The children for a cell must be contained in a **"children"** array.
+After installing and enabling the plugin, treemaps can be added to notes by creating JSON code blocks. 
+The root element of the JSON code block must contain an element "type": "enhancedtreemap".
 
 <pre>
 ```json
@@ -35,7 +29,7 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 
 ## Settings
 
-Here is the [JSON code block](example/Settings.md) used to create the treemap below.
+The treemap below describes all of the available settings for the Enhanced Treemap plugin. Here is the [JSON code block](example/Settings.md) used to create it.
 
 ![Settings Image](./examples/Settings.png)
 
