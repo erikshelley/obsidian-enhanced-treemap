@@ -94,10 +94,13 @@ export default class EnhancedTreemapPlugin extends Plugin {
         // only create the tree if there is a code block containing the expected text
         var codeblock = element.querySelector("code");
         if (codeblock == null) return;
-        var data = codeblock.textContent;
-        if (data.match(/"type": "enhancedtreemap"/)) {
-            await this.enhancedtreemap.renderEnhancedTreemap(element, context);
-        }
+        try {
+            var data = JSON.parse(codeblock.textContent);
+            var type = data.type;
+            if (type == "enhancedtreemap") {
+                await this.enhancedtreemap.renderEnhancedTreemap(element, context);
+            }
+        } catch(e) { }
     }
 
     async onload() {

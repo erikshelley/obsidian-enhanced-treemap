@@ -15,12 +15,12 @@ The root element of the JSON code block must contain an element "type": "enhance
 <pre>
 ```json
 {
-"type": "enhancedtreemap",
-"name": "Header",
-"children": [
-    { "name": "Cell 1" },
-    { "name": "Cell 2" }
-]
+    "type": "enhancedtreemap",
+    "name": "Header",
+    "children": [
+        { "name": "Cell 1" },
+        { "name": "Cell 2" }
+    ]
 }
 ```
 </pre>

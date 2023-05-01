@@ -350,8 +350,10 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         var svg_element = document.getElementById(this.svg_id);
 
         // would be nice to have a better solution here, sometimes this function is called before the svg is in the DOM
-        //if (svg_element == null) await new Promise(r => setTimeout(r, 100));
-        //svg_element = document.getElementById(this.svg_id);
+        while (svg_element == null) {
+            await new Promise(r => setTimeout(r, 100));
+            svg_element = document.getElementById(this.svg_id);
+        }
 
         var width = this.svg_width;
         var height = this.svg_height;
