@@ -28,7 +28,7 @@ The root element of the JSON code block must contain an element "type": "enhance
 ```
 </pre>
 
-![Simple Example Image](./examples/Simple-Example.png)
+![Simple Example Image](./examples/SimpleExample.png)
 
 ## Settings
 
