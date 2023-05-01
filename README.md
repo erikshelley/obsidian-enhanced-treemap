@@ -1,4 +1,4 @@
-# Obsidian Enhanced TreeMap Plugin
+# Obsidian Enhanced Treemap Plugin
 
 This is a data visualization plugin for [Obsidian](https://obsidian.md), based on [D3.js](https://d3js.org), that allows for the creation of [Nested Treemaps](https://observablehq.com/@d3/nested-treemap).
 
@@ -35,7 +35,7 @@ After installing and enabling the plugin, treemaps can be added to notes by crea
 
 ## Settings
 
-[Settings JSON](examples/Settings.md)
+Here is the [JSON code block](example/Settings.md) used to create the treemap below.
 
 ![Settings Image](./examples/Settings.png)
 

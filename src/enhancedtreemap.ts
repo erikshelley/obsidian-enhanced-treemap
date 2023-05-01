@@ -1,34 +1,34 @@
 import { MarkdownRenderChild } from 'obsidian';
 import * as d3 from 'd3';
 
-export default class EnhancedTreeMap {
+export default class EnhancedTreemap {
     plugin: ChartPlugin;
 
     constructor(plugin: ChartPlugin) {
         this.plugin = plugin;
     }
 
-    async renderEnhancedTreeMap(element: HTMLElement, ctx: MarkdownPostProcessorContext) {
+    async renderEnhancedTreemap(element: HTMLElement, ctx: MarkdownPostProcessorContext) {
         var renderer;
 
         // need this "await" on adding the svg to the DOM before adding the text otherwise getComputedTextLenght does not work
         await this.plugin.app.workspace.onLayoutReady(() => {
-            renderer = new EnhancedTreeMapRenderChild(element, this, ctx, this.plugin.settings);
+            renderer = new EnhancedTreemapRenderChild(element, this, ctx, this.plugin.settings);
             ctx.addChild(renderer);
         });
 
         await this.plugin.app.workspace.onLayoutReady(() => {
-            renderer.renderEnhancedTreeMap();
+            renderer.renderEnhancedTreemap();
         });
     }
 }
 
-class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
+class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     ctx:                  string;
     data:                 string;
     uuid:                 float;
     element:              HTMLElement;
-    enhancedtreemap:      EnhancedTreeMap;
+    enhancedtreemap:      EnhancedTreemap;
     error:                bool;
     svg:                  HTMLElement;
     svg_height:           float;
@@ -69,7 +69,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
     text_size:            float;
     valign:               string;
 
-    constructor(element: HTMLElement, enhancedtreemap: EnhancedTreeMap, ctx: MarkdownPostProcessorContext, settings: array) {
+    constructor(element: HTMLElement, enhancedtreemap: EnhancedTreemap, ctx: MarkdownPostProcessorContext, settings: array) {
         super(element);
         this.ctx                  = ctx;
         this.element              = element;
@@ -345,7 +345,7 @@ class EnhancedTreeMapRenderChild extends MarkdownRenderChild {
         return wrapper;
     }
 
-    async renderEnhancedTreeMap() {
+    async renderEnhancedTreemap() {
         if (this.error) return;
         var svg_element = document.getElementById(this.svg_id);
 

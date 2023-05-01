@@ -1,5 +1,5 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, FileSystemAdapter} from 'obsidian';
-import EnhancedTreeMap from './enhancedtreemap';
+import EnhancedTreemap from './enhancedtreemap';
 
 interface EnhancedTreemapSettings {
     aspect_w:       float;
@@ -80,7 +80,7 @@ const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
 
 export default class EnhancedTreemapPlugin extends Plugin {
     settings: EnhancedTreemapSettings;
-    enhancedtreemap: EnhancedTreeMap;
+    enhancedtreemap: EnhancedTreemap;
 
     /*
        Description: 
@@ -96,14 +96,14 @@ export default class EnhancedTreemapPlugin extends Plugin {
         if (codeblock == null) return;
         var data = codeblock.textContent;
         if (data.match(/"type": "enhancedtreemap"/)) {
-            await this.enhancedtreemap.renderEnhancedTreeMap(element, context);
+            await this.enhancedtreemap.renderEnhancedTreemap(element, context);
         }
     }
 
     async onload() {
         await this.loadSettings();
         this.addSettingTab(new SampleSettingTab(this.app, this));
-        this.enhancedtreemap = new EnhancedTreeMap(this);
+        this.enhancedtreemap = new EnhancedTreemap(this);
         this.registerMarkdownPostProcessor((el, ctx) => this.postprocessor(el, ctx));
 
 		/*this.app.workspace.onLayoutReady(() => {
@@ -174,8 +174,8 @@ class SampleSettingTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('TreeMap Width')
-            .setDesc('Default TreeMap Width (if Using Fixed Width)')
+            .setName('Treemap Width')
+            .setDesc('Default Treemap Width (if Using Fixed Width)')
             .addText(text => text
                 .setValue(this.plugin.settings.width.toString())
                 .onChange(async (value) => {
