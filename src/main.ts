@@ -1,5 +1,5 @@
-import { App, Plugin, Setting, MarkdownView } from 'obsidian';
-import { EnhancedTreemapSettingTab, DEFAULT_SETTINGS } from './settings';
+import { App, Plugin, Setting, MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
+import { EnhancedTreemapSettings, EnhancedTreemapSettingTab, DEFAULT_SETTINGS } from './settings';
 import EnhancedTreemap from './enhancedtreemap';
 
 export default class EnhancedTreemapPlugin extends Plugin {
@@ -11,41 +11,42 @@ export default class EnhancedTreemapPlugin extends Plugin {
         var codeblock = element.querySelector("code");
         if (codeblock == null) return;
         try {
-            var data = JSON.parse(codeblock.textContent);
-            var type = data.type;
-            if (type == "enhancedtreemap") {
-                await this.enhancedtreemap.renderEnhancedTreemap(element, context);
+            var text = codeblock.textContent;
+            if (text != null) {
+                var data = JSON.parse(text);
+                var type = data.type;
+                if (type == "enhancedtreemap") {
+                    await this.enhancedtreemap.renderEnhancedTreemap(element, context);
+                }
             }
         } catch(e) { }
     }
 
     async onload() {
         await this.loadSettings();
-        this.elements = [];
-        this.contexts = [];
         this.addSettingTab(new EnhancedTreemapSettingTab(this.app, this));
         this.enhancedtreemap = new EnhancedTreemap(this);
         this.registerMarkdownPostProcessor((el, ctx) => { this.postprocessor(el, ctx) });
-
-        /*app.workspace.on('resize', () => { });*/
-
-		/*this.app.workspace.onLayoutReady(() => {
-			this.previousWidth = window.innerWidth;
-			this.toggleSidebars();
-			app.workspace.on('resize', () => this.toggleSidebars());
-		});*/
     }
 
     onunload() { }
 
-    async loadSettings() { this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()); }
+    async loadSettings() { 
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()); 
+    }
 
     async saveSettings() { 
         await this.saveData(this.settings); 
-        const view = app.workspace.getActiveViewOfType(MarkdownView);
-        if (view) {
-            if (view.leaf) view.leaf.rebuildView();
-        }
+        // Not sure how to get the treemaps to refresh after settings are updated
+        // rebuildView works with "npm run dev" but does not work with "npm run build"
+
+        //this.app.workspace.updateOptions();
+        //const view = app.workspace.getActiveViewOfType(MarkdownView);
+        //const editor = view.editor;
+        //editor.refresh();
+        //if (view) {
+        //    if (view.leaf) view.leaf.rebuildView();
+        //}
     }
 }
 

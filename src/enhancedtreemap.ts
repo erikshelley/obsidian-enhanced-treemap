@@ -1,15 +1,17 @@
-import { MarkdownRenderChild } from 'obsidian';
+import { MarkdownPostProcessorContext, MarkdownRenderChild } from 'obsidian';
+import EnhancedTreemapPlugin from './main';
+import { EnhancedTreemapSettings } from './settings';
 import * as d3 from 'd3';
 
 export default class EnhancedTreemap {
-    plugin: ChartPlugin;
+    plugin: EnhancedTreemapPlugin;
 
-    constructor(plugin: ChartPlugin) {
+    constructor(plugin: EnhancedTreemapPlugin) {
         this.plugin = plugin;
     }
 
     async renderEnhancedTreemap(element: HTMLElement, ctx: MarkdownPostProcessorContext) {
-        var renderer;
+        var renderer: EnhancedTreemapRenderChild;
 
         // need this "await" on adding the svg to the DOM before adding the text otherwise getComputedTextLenght does not work
         await this.plugin.app.workspace.onLayoutReady(() => {
@@ -24,52 +26,52 @@ export default class EnhancedTreemap {
 }
 
 class EnhancedTreemapRenderChild extends MarkdownRenderChild {
-    ctx:                  string;
-    data:                 string;
-    uuid:                 float;
+    ctx:                  MarkdownPostProcessorContext;
+    data:                 any;
+    uuid:                 number;
     element:              HTMLElement;
     enhancedtreemap:      EnhancedTreemap;
-    error:                bool;
-    svg:                  HTMLElement;
-    svg_height:           float;
+    error:                boolean;
+    svg:                  SVGSVGElement|null;
+    svg_height:           number;
     svg_id:               string;
-    svg_width:            float;
+    svg_width:            number;
 
     // Treemap Settings
-    aspect_ratio:         float;
-    aspect_w:             float;
-    aspect_h:             float;
-    outer_padding:        float;
-    fixed_width:          bool;
-    h_shadow_size:        float;
-    h_text_padding:       float;
-    shadow_size:          float;
-    show_headers:         bool;
-    show_values:          bool;
-    sort_by_value:        bool;
-    width:                float;
+    aspect_ratio:         number;
+    aspect_w:             number;
+    aspect_h:             number;
+    outer_padding:        number;
+    fixed_width:          boolean;
+    h_shadow_size:        number;
+    h_text_padding:       number;
+    shadow_size:          number;
+    show_headers:         boolean;
+    show_values:          boolean;
+    sort_by_value:        boolean;
+    width:                number;
 
     // Header Settings
-    h_border_color:       Array<float>;
-    h_fill:               Array<float>;
+    h_border_color:       Array<number>;
+    h_fill:               Array<number>;
     h_halign:             string;
-    h_shading:            bool;
-    h_shadow:             bool;
-    h_text_color:         Array<float>;
-    h_text_size:          float;
+    h_shading:            boolean;
+    h_shadow:             boolean;
+    h_text_color:         Array<number>;
+    h_text_size:          number;
 
     // Cell Settings
-    border_color:         Array<float>;
-    fill:                 Array<float>;
+    border_color:         Array<number>;
+    fill:                 Array<number>;
     halign:               string;
-    shading:              bool;
-    shadow:               bool;
-    text_color:           Array<float>;
-    text_padding:         float;
-    text_size:            float;
+    shading:              boolean;
+    shadow:               boolean;
+    text_color:           Array<number>;
+    text_padding:         number;
+    text_size:            number;
     valign:               string;
 
-    constructor(element: HTMLElement, enhancedtreemap: EnhancedTreemap, ctx: MarkdownPostProcessorContext, settings: array) {
+    constructor(element: HTMLElement, enhancedtreemap: EnhancedTreemap, ctx: MarkdownPostProcessorContext, settings: EnhancedTreemapSettings) {
         super(element);
         this.ctx                  = ctx;
         this.element              = element;
@@ -117,46 +119,57 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
     async onload() {
         try {
-            this.data = JSON.parse(this.element.querySelector("code").textContent);
-            this.parseSettings();
-            if (!this.error) {
-                var parentDiv = this.element.querySelector("pre");
-                parentDiv.replaceWith(this.emptySVG());
-                this.svg = this.element.querySelector("svg");
+            var code = this.element.querySelector("code");
+            if (code != null) {
+                var text = code.textContent;
+                if (text != null) {
+                    this.data = JSON.parse(text);
+                    this.parseSettings();
+                    if (!this.error) {
+                        var parentDiv = this.element.querySelector("pre");
+                        var svg = this.emptySVG();
+                        if (parentDiv != null && svg != null) {
+                            parentDiv.replaceWith(svg);
+                            this.svg = this.element.querySelector("svg");
+                        }
+                    }
+                }
             }
         } catch(e) {
             this.handleError(e);
         }
     }
 
-    handleError(message) {
+    handleError(message: string) {
         this.error = true;
         const wrapper = document.createElement("div");
         wrapper.textContent = message;
         wrapper.setAttribute("style", "color: red");
         var parentDiv = this.element.querySelector("pre");
-        parentDiv.replaceWith(wrapper);
+        if (parentDiv != null) parentDiv.replaceWith(wrapper);
     }
 
-    verifyOption(value, setting, type, low, high, value_list) {
-        if (type == "float") {
-            var output = parseFloat(value);
-            if (Number.isNaN(output)) this.handleError(setting + " must be a number!");
-            if (low != null && value < low) this.handleError(setting + " must be >= " + low);
-            if (high != null && value > high) this.handleError(setting + " must be <= " + high);
-            return output;
-        }
-        if (type == "bool") {
-            if (typeof value != "boolean") this.handleError(setting + " must be true or false (no quotes)!");
-        }
-        if (type == "string") {
-            if (!value_list.includes(value)) this.handleError(setting + "must be in this list: " + value_list);
-        }
+    verifyNumber(value: number, setting: string, low: number, high: number) {
+        if (Number.isNaN(value)) this.handleError(setting + " must be a number!");
+        if (low != null && value < low) this.handleError(setting + " must be >= " + low);
+        if (high != null && value > high) this.handleError(setting + " must be <= " + high);
+        return value;
+    }
+
+    verifyBoolean(value: boolean, setting: string) {
+        if (typeof value != "boolean") this.handleError(setting + " must be true or false (no quotes)!");
+        return value;
+    }
+
+    verifyString(value: string, setting: string, value_list: Array<string>) {
+        if (!value_list.includes(value)) this.handleError(setting + "must be in this list: " + value_list);
         return value;
     }
 
     parseSettings() {
-        var settings = this.data.settings;
+        if (this.data == null) return;
+        var settings: Array<any>;
+        settings = this.data.settings;
         if (settings) {
             settings.forEach(setting => {
                 // Treemap Settings
@@ -165,113 +178,113 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     var ratio = setting.aspect_ratio.split(":");
                     if (ratio[0] == 0 || ratio[1] == 0) this.handleError("aspect_ratio cannot include any zeros");
                     else aspect = ratio[0] / ratio[1];
-                    this.aspect_ratio = this.verifyOption(aspect, "aspect_ratio", "float", 0, null, null);
+                    this.aspect_ratio = this.verifyNumber(aspect, "aspect_ratio", 0, Number.MAX_SAFE_INTEGER);
                     this.aspect_w = ratio[0];
                     this.aspect_h = ratio[1];
                 }
                 if (setting.outer_padding != null) 
-                    this.outer_padding = this.verifyOption(setting.outer_padding, "outer_padding", "float", 0, null, null);
+                    this.outer_padding = this.verifyNumber(setting.outer_padding, "outer_padding", 0, Number.MAX_SAFE_INTEGER);
                 if (setting.fixed_width != null) 
                     this.fixed_width = setting.fixed_width;
                 if (setting.h_shadow_size != null) 
-                    this.h_shadow_size = this.verifyOption(setting.h_shadow_size, "h_shadow_size", "float", 0, null, null);
+                    this.h_shadow_size = this.verifyNumber(setting.h_shadow_size, "h_shadow_size", 0, Number.MAX_SAFE_INTEGER);
                 if (setting.h_text_padding != null) 
-                    this.h_text_padding = this.verifyOption(setting.h_text_padding, "h_text_padding", "float", 0, null, null);
+                    this.h_text_padding = this.verifyNumber(setting.h_text_padding, "h_text_padding", 0, Number.MAX_SAFE_INTEGER);
                 if (setting.shadow_size != null) 
-                    this.shadow_size = this.verifyOption(setting.shadow_size, "shadow_size", "float", 0, null, null);
+                    this.shadow_size = this.verifyNumber(setting.shadow_size, "shadow_size", 0, Number.MAX_SAFE_INTEGER);
                 if (setting.show_headers != null) 
-                    this.show_headers = this.verifyOption(setting.show_headers, "show_headers", "bool", null, null, null);
+                    this.show_headers = this.verifyBoolean(setting.show_headers, "show_headers");
                 if (setting.sort_by_value != null) 
-                    this.sort_by_value = this.verifyOption(setting.sort_by_value, "sort_by_value", "bool", null, null, null);
+                    this.sort_by_value = this.verifyBoolean(setting.sort_by_value, "sort_by_value");
                 if (setting.width != null) 
-                    this.width = this.verifyOption(setting.width, "width", "float", 1, null, null);
+                    this.width = this.verifyNumber(setting.width, "width", 1, Number.MAX_SAFE_INTEGER);
                 
                 // Header Settings
                 if (setting.h_border_color != null) {
                     if (setting.h_border_color.h != null) 
-                        this.h_border_color[0] = this.verifyOption(setting.h_border_color.h, "h_border_color hue", "float", 0, 360, null);
+                        this.h_border_color[0] = this.verifyNumber(setting.h_border_color.h, "h_border_color hue", 0, 360);
                     if (setting.h_border_color.s != null) 
-                        this.h_border_color[1] = this.verifyOption(setting.h_border_color.s, "h_border_color saturation", "float", 0, 1, null);
+                        this.h_border_color[1] = this.verifyNumber(setting.h_border_color.s, "h_border_color saturation", 0, 1);
                     if (setting.h_border_color.l != null) 
-                        this.h_border_color[2] = this.verifyOption(setting.h_border_color.l, "h_border_color lightness", "float", 0, 1, null);
+                        this.h_border_color[2] = this.verifyNumber(setting.h_border_color.l, "h_border_color lightness", 0, 1);
                     if (setting.h_border_color.a != null) 
-                        this.h_border_color[3] = this.verifyOption(setting.h_border_color.a, "h_border_color alpha", "float", 0, 1, null);
+                        this.h_border_color[3] = this.verifyNumber(setting.h_border_color.a, "h_border_color alpha", 0, 1);
                 }
                 if (setting.h_fill != null) {
                     if (setting.h_fill.h != null) 
-                        this.h_fill[0] = this.verifyOption(setting.h_fill.h, "h_fill hue", "float", 0, 360, null);
+                        this.h_fill[0] = this.verifyNumber(setting.h_fill.h, "h_fill hue", 0, 360);
                     if (setting.h_fill.s != null) 
-                        this.h_fill[1] = this.verifyOption(setting.h_fill.s, "h_fill saturation", "float", 0, 1, null);
+                        this.h_fill[1] = this.verifyNumber(setting.h_fill.s, "h_fill saturation", 0, 1);
                     if (setting.h_fill.l != null) 
-                        this.h_fill[2] = this.verifyOption(setting.h_fill.l, "h_fill lightness", "float", 0, 1, null);
+                        this.h_fill[2] = this.verifyNumber(setting.h_fill.l, "h_fill lightness", 0, 1);
                     if (setting.h_fill.a != null) 
-                        this.h_fill[3] = this.verifyOption(setting.h_fill.a, "h_fill alpha", "float", 0, 1, null);
+                        this.h_fill[3] = this.verifyNumber(setting.h_fill.a, "h_fill alpha", 0, 1);
                 }
                 if (setting.h_halign != null) 
-                    this.h_halign = this.verifyOption(setting.h_halign, "h_halign", "string", null, null, ["left", "center", "right"]);
+                    this.h_halign = this.verifyString(setting.h_halign, "h_halign", ["left", "center", "right"]);
                 if (setting.h_shading != null) 
-                    this.h_shading = this.verifyOption(setting.h_shading, "h_shading", "bool", null, null, null);
+                    this.h_shading = this.verifyBoolean(setting.h_shading, "h_shading");
                 if (setting.h_shadow != null) 
-                    this.h_shadow = this.verifyOption(setting.h_shadow, "h_shadow", "bool", null, null, null);
+                    this.h_shadow = this.verifyBoolean(setting.h_shadow, "h_shadow");
                 if (setting.h_text_color != null) {
                     if (setting.h_text_color.h != null) 
-                        this.h_text_color[0] = this.verifyOption(setting.h_text_color.h, "h_text_color hue", "float", 0, 360, null);
+                        this.h_text_color[0] = this.verifyNumber(setting.h_text_color.h, "h_text_color hue", 0, 360);
                     if (setting.h_text_color.s != null) 
-                        this.h_text_color[1] = this.verifyOption(setting.h_text_color.s, "h_text_color saturation", "float", 0, 1, null);
+                        this.h_text_color[1] = this.verifyNumber(setting.h_text_color.s, "h_text_color saturation", 0, 1);
                     if (setting.h_text_color.l != null) 
-                        this.h_text_color[2] = this.verifyOption(setting.h_text_color.l, "h_text_color lightness", "float", 0, 1, null);
+                        this.h_text_color[2] = this.verifyNumber(setting.h_text_color.l, "h_text_color lightness", 0, 1);
                     if (setting.h_text_color.a != null) 
-                        this.h_text_color[3] = this.verifyOption(setting.h_text_color.a, "h_text_color alpha", "float", 0, 1, null);
+                        this.h_text_color[3] = this.verifyNumber(setting.h_text_color.a, "h_text_color alpha", 0, 1);
                 }
                 if (setting.h_text_size != null) 
-                    this.h_text_size = this.verifyOption(setting.h_text_size, "h_text_size", "float", 1, null, null); 
+                    this.h_text_size = this.verifyNumber(setting.h_text_size, "h_text_size", 1, Number.MAX_SAFE_INTEGER); 
                 if (this.show_headers == false) this.h_text_size = 0;
 
                 // Cell Settings
                 if (setting.border_color != null) {
                     if (setting.border_color.h != null) 
-                        this.border_color[0] = this.verifyOption(setting.border_color.h, "border_color hue", "float", 0, 360, null);
+                        this.border_color[0] = this.verifyNumber(setting.border_color.h, "border_color hue", 0, 360);
                     if (setting.border_color.s != null) 
-                        this.border_color[1] = this.verifyOption(setting.border_color.s, "border_color saturation", "float", 0, 1, null);
+                        this.border_color[1] = this.verifyNumber(setting.border_color.s, "border_color saturation", 0, 1);
                     if (setting.border_color.l != null) 
-                        this.border_color[2] = this.verifyOption(setting.border_color.l, "border_color lightness", "float", 0, 1, null);
+                        this.border_color[2] = this.verifyNumber(setting.border_color.l, "border_color lightness", 0, 1);
                     if (setting.border_color.a != null) 
-                        this.border_color[3] = this.verifyOption(setting.border_color.a, "border_color alpha", "float", 0, 1, null);
+                        this.border_color[3] = this.verifyNumber(setting.border_color.a, "border_color alpha", 0, 1);
                 }
                 if (setting.fill != null) {
                     if (setting.fill.h != null) 
-                        this.fill[0] = this.verifyOption(setting.fill.h, "fill hue", "float", 0, 360, null);
+                        this.fill[0] = this.verifyNumber(setting.fill.h, "fill hue", 0, 360);
                     if (setting.fill.s != null) 
-                        this.fill[1] = this.verifyOption(setting.fill.s, "fill saturation", "float", 0, 1, null);
+                        this.fill[1] = this.verifyNumber(setting.fill.s, "fill saturation", 0, 1);
                     if (setting.fill.l != null) 
-                        this.fill[2] = this.verifyOption(setting.fill.l, "fill lightness", "float", 0, 1, null);
+                        this.fill[2] = this.verifyNumber(setting.fill.l, "fill lightness", 0, 1);
                     if (setting.fill.a != null) 
-                        this.fill[3] = this.verifyOption(setting.fill.a, "fill alpha", "float", 0, 1, null);
+                        this.fill[3] = this.verifyNumber(setting.fill.a, "fill alpha", 0, 1);
                 }
                 if (setting.halign != null) 
-                    this.halign = this.verifyOption(setting.halign, "halign", "string", null, null, ["left", "center", "right"]);
+                    this.halign = this.verifyString(setting.halign, "halign", ["left", "center", "right"]);
                 if (setting.shading != null) 
-                    this.shading = this.verifyOption(setting.shading, "shading", "bool", null, null, null);
+                    this.shading = this.verifyBoolean(setting.shading, "shading");
                 if (setting.shadow != null) 
-                    this.shadow = this.verifyOption(setting.shadow, "shadow", "bool", null, null, null);
+                    this.shadow = this.verifyBoolean(setting.shadow, "shadow");
                 if (setting.show_values != null) 
-                    this.show_values = this.verifyOption(setting.show_values, "show_values", "bool", null, null, null);
+                    this.show_values = this.verifyBoolean(setting.show_values, "show_values");
                 if (setting.text_color != null) {
                     if (setting.text_color.h != null) 
-                        this.text_color[0] = this.verifyOption(setting.text_color.h, "text_color hue", "float", 0, 360, null);
+                        this.text_color[0] = this.verifyNumber(setting.text_color.h, "text_color hue", 0, 360);
                     if (setting.text_color.s != null) 
-                        this.text_color[1] = this.verifyOption(setting.text_color.s, "text_color saturation", "float", 0, 1, null);
+                        this.text_color[1] = this.verifyNumber(setting.text_color.s, "text_color saturation", 0, 1);
                     if (setting.text_color.l != null) 
-                        this.text_color[2] = this.verifyOption(setting.text_color.l, "text_color lightness", "float", 0, 1, null);
+                        this.text_color[2] = this.verifyNumber(setting.text_color.l, "text_color lightness", 0, 1);
                     if (setting.text_color.a != null) 
-                        this.text_color[3] = this.verifyOption(setting.text_color.a, "text_color alpha", "float", 0, 1, null);
+                        this.text_color[3] = this.verifyNumber(setting.text_color.a, "text_color alpha", 0, 1);
                 }
                 if (setting.text_padding != null) 
-                    this.text_padding = this.verifyOption(setting.text_padding, "text_padding", "float", 0, null, null);
+                    this.text_padding = this.verifyNumber(setting.text_padding, "text_padding", 0, Number.MAX_SAFE_INTEGER);
                 if (setting.text_size != null) 
-                    this.text_size = this.verifyOption(setting.text_size, "text_size", "float", 1, null, null); 
+                    this.text_size = this.verifyNumber(setting.text_size, "text_size", 1, Number.MAX_SAFE_INTEGER); 
                 if (setting.valign != null) 
-                    this.valign = this.verifyOption(setting.valign, "vertical_alignment", "string", null, null, ["top", "center", "bottom"]);
+                    this.valign = this.verifyString(setting.valign, "vertical_alignment", ["top", "center", "bottom"]);
             });
         }
     }
@@ -288,13 +301,13 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
         if (this.fixed_width == false) { 
             svg.setAttribute("width", "100%"); 
-            svg.setAttribute("viewBox", "0 0 " + this.svg_width + " " + this.svg_height);
+            svg.setAttribute("viewBox", "0 0 " + this.svg_width.toString() + " " + this.svg_height.toString());
         }
         else { 
             this.svg_width = this.width;
             this.svg_height = this.width / this.aspect_ratio;
-            svg.setAttribute("width", this.svg_width); 
-            svg.setAttribute("height", this.svg_height)
+            svg.setAttribute("width", this.svg_width.toString()); 
+            svg.setAttribute("height", this.svg_height.toString())
         }
 
         svg.setAttribute("name", "enhancedtreemap");
@@ -323,9 +336,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         h_filter.setAttribute("id", "h_shadow_" + this.uuid);
         h_filter.setAttribute("color-interpolation-filters", "sRGB");
         const h_feDropShadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
-        h_feDropShadow.setAttribute("dx", this.h_shadow_size);
-        h_feDropShadow.setAttribute("dy", this.h_shadow_size);
-        h_feDropShadow.setAttribute("stdDeviation", this.h_shadow_size);
+        h_feDropShadow.setAttribute("dx", this.h_shadow_size.toString());
+        h_feDropShadow.setAttribute("dy", this.h_shadow_size.toString());
+        h_feDropShadow.setAttribute("stdDeviation", this.h_shadow_size.toString());
         h_feDropShadow.setAttribute("flood-opacity", "0.5");
         h_filter.appendChild(h_feDropShadow);
         svg.append(h_filter);
@@ -334,9 +347,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         filter.setAttribute("id", "shadow_" + this.uuid);
         filter.setAttribute("color-interpolation-filters", "sRGB");
         const feDropShadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
-        feDropShadow.setAttribute("dx", this.shadow_size);
-        feDropShadow.setAttribute("dy", this.shadow_size);
-        feDropShadow.setAttribute("stdDeviation", this.shadow_size);
+        feDropShadow.setAttribute("dx", this.shadow_size.toString());
+        feDropShadow.setAttribute("dy", this.shadow_size.toString());
+        feDropShadow.setAttribute("stdDeviation", this.shadow_size.toString());
         feDropShadow.setAttribute("flood-opacity", "0.5");
         filter.appendChild(feDropShadow);
         svg.append(filter);
@@ -361,8 +374,10 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
         if (!this.fixed_width) {
             scale = this.aspect_ratio;
-            width = svg_element.parentElement.offsetWidth * scale;
-            height = svg_element.parentElement.offsetHeight;
+            if (svg_element.parentElement != null) {
+                width = svg_element.parentElement.offsetWidth * scale;
+                height = svg_element.parentElement.offsetHeight;
+            }
             svg_element.setAttribute("viewBox", "0 0 " + width + " " + height);
         }
 
@@ -373,7 +388,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         // the ||!d.children adds a default value of 1 for any leaf nodes with no value
         var nodes;
         if (this.sort_by_value) {
-            nodes = d3.hierarchy(this.data).sum((d: any) => { return d.value||!d.children; }).sort((a, b) => b.value - a.value);
+            nodes = d3.hierarchy(this.data).sum((d: any) => { return d.value||!d.children; }).sort((a: any, b: any) => b.value - a.value);
         }
         else {
             nodes = d3.hierarchy(this.data).sum((d: any) => { return d.value||!d.children; });
@@ -406,59 +421,59 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .attr("stroke", (d: any) => { 
                     if (d.children) {
                         if (d.data.border_color == null) {
-                            return d3.hsl(this.h_border_color[0], this.h_border_color[1], this.h_border_color[2], this.h_border_color[3]);
+                            return d3.hsl(this.h_border_color[0], this.h_border_color[1], this.h_border_color[2], this.h_border_color[3]).toString();
                         }
                         else {
                             return d3.hsl(
                                 d.data.border_color.h == null ? this.h_border_color[0] : d.data.border_color.h, 
                                 d.data.border_color.s == null ? this.h_border_color[1] : d.data.border_color.s, 
                                 d.data.border_color.l == null ? this.h_border_color[2] : d.data.border_color.l, 
-                                d.data.border_color.a == null ? this.h_border_color[3] : d.data.border_color.a);
+                                d.data.border_color.a == null ? this.h_border_color[3] : d.data.border_color.a).toString();
                         }
                     }
                     else {
                         if (d.data.border_color == null) {
-                            return d3.hsl(this.border_color[0], this.border_color[1], this.border_color[2], this.border_color[3]);
+                            return d3.hsl(this.border_color[0], this.border_color[1], this.border_color[2], this.border_color[3]).toString();
                         }
                         else {
                             return d3.hsl(
                                 d.data.border_color.h == null ? this.border_color[0] : d.data.border_color.h, 
                                 d.data.border_color.s == null ? this.border_color[1] : d.data.border_color.s, 
                                 d.data.border_color.l == null ? this.border_color[2] : d.data.border_color.l, 
-                                d.data.border_color.a == null ? this.border_color[3] : d.data.border_color.a);
+                                d.data.border_color.a == null ? this.border_color[3] : d.data.border_color.a).toString();
                         }
                     }
                 })
                 .attr("fill",   (d: any) => { 
                     if (d.children) {
-                        if (d.data.fill == null) { return d3.hsl(this.h_fill[0], this.h_fill[1], this.h_fill[2], this.h_fill[3]); }
+                        if (d.data.fill == null) { return d3.hsl(this.h_fill[0], this.h_fill[1], this.h_fill[2], this.h_fill[3]).toString(); }
                         else {
                             return d3.hsl(
                                 d.data.fill.h == null ? this.h_fill[0] : d.data.fill.h, 
                                 d.data.fill.s == null ? this.h_fill[1] : d.data.fill.s, 
                                 d.data.fill.l == null ? this.h_fill[2] : d.data.fill.l, 
-                                d.data.fill.a == null ? this.h_fill[3] : d.data.fill.a);
+                                d.data.fill.a == null ? this.h_fill[3] : d.data.fill.a).toString();
                         }
                     }
                     else {
-                        if (d.data.fill == null) { return d3.hsl(this.fill[0], this.fill[1], this.fill[2], this.fill[3]); }
+                        if (d.data.fill == null) { return d3.hsl(this.fill[0], this.fill[1], this.fill[2], this.fill[3]).toString(); }
                         else {
                             return d3.hsl(
                                 d.data.fill.h == null ? this.fill[0] : d.data.fill.h, 
                                 d.data.fill.s == null ? this.fill[1] : d.data.fill.s, 
                                 d.data.fill.l == null ? this.fill[2] : d.data.fill.l, 
-                                d.data.fill.a == null ? this.fill[3] : d.data.fill.a);
+                                d.data.fill.a == null ? this.fill[3] : d.data.fill.a).toString();
                         }
                     }
                 })
                 .attr("filter", (d: any) => { 
                     if (d.children) {
-                        if (d.data.shadow == null) { if (this.h_shadow) { return "url(#h_shadow_" + this.uuid + ")"; } }
-                        else { if (d.data.shadow) { return "url(#h_shadow_" + this.uuid + ")"; } }
+                        if (d.data.shadow == null) { if (this.h_shadow) { return "url(#h_shadow_" + this.uuid + ")"; } else return ""; }
+                        else { if (d.data.shadow) { return "url(#h_shadow_" + this.uuid + ")"; } else return ""; }
                     }
                     else {
-                        if (d.data.shadow == null) { if (this.shadow) { return "url(#shadow_" + this.uuid + ")"; } }
-                        else { if (d.data.shadow) { return "url(#shadow_" + this.uuid + ")"; } }
+                        if (d.data.shadow == null) { if (this.shadow) { return "url(#shadow_" + this.uuid + ")"; } else return ""; }
+                        else { if (d.data.shadow) { return "url(#shadow_" + this.uuid + ")"; } else return ""; }
                     }
                 });
 
@@ -471,18 +486,18 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .attr("fill",   (d: any) => { 
                     if (d.children) {
                         if (d.data.shading == null) {
-                            return (this.h_shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0));
+                            return (this.h_shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
                         }
                         else {
-                            return (d.data.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0));
+                            return (d.data.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
                         }
                     }
                     else {
                         if (d.data.shading == null) {
-                            return (this.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0));
+                            return (this.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
                         }
                         else {
-                            return (d.data.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0));
+                            return (d.data.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
                         }
                     }
                 })
@@ -509,16 +524,17 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                       if (d.data.halign == "left"   || (d.data.halign == null && this.halign == "left"))   return "start";
                       if (d.data.halign == "center" || (d.data.halign == null && this.halign == "center")) return "middle";
                       if (d.data.halign == "right"  || (d.data.halign == null && this.halign == "right"))  return "end";
+                      return "start";
                 })
                 .attr("font-size",   (d: any) => { return textSize(d, scale, text_size) + "px" })
                 .attr("fill",        (d: any) => { 
                     return d.data.text_color == null ? 
-                        d3.hsl(this.text_color[0], this.text_color[1], this.text_color[2], this.text_color[3]) : 
+                        d3.hsl(this.text_color[0], this.text_color[1], this.text_color[2], this.text_color[3]).toString() : 
                         d3.hsl(
                             d.data.text_color.h == null ? this.text_color[0] : d.data.text_color.h, 
                             d.data.text_color.s == null ? this.text_color[1] : d.data.text_color.s, 
                             d.data.text_color.l == null ? this.text_color[2] : d.data.text_color.l, 
-                            d.data.text_color.a == null ? this.text_color[3] : d.data.text_color.a)
+                            d.data.text_color.a == null ? this.text_color[3] : d.data.text_color.a).toString()
                 })
                 .attr("opacity",     (d: any) => { return ((d.y1 - d.y0 < textSize(d, scale, text_size)) || (d.x1 - d.x0 < 2 * textSize(d, scale, text_size))) ? 0 : 1 })
                 .text((d: any) => { return this.show_values ? (d.data.value || 1) + " " + d.data.name : d.data.name; })
@@ -534,6 +550,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                             if (d.data.halign == "left"   || (d.data.halign == null && this.h_halign == "left"))   return d.x0 + 1.0 * h_text_padding; 
                             if (d.data.halign == "center" || (d.data.halign == null && this.h_halign == "center")) return d.x0 + 0.5 * (d.x1 - d.x0); 
                             if (d.data.halign == "right"  || (d.data.halign == null && this.h_halign == "right"))  return d.x1 - 1.0 * h_text_padding; 
+                            return "left";
                     })
                     .attr("y",           (d: any) => { return d.y0 + h_text_padding + 0.8 * textSize(d, scale, h_text_size) })
                     .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * h_text_padding; })
@@ -541,14 +558,16 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                           if (d.data.halign == "left"   || (d.data.halign == null && this.h_halign == "left"))   return "start";
                           if (d.data.halign == "center" || (d.data.halign == null && this.h_halign == "center")) return "middle";
                           if (d.data.halign == "right"  || (d.data.halign == null && this.h_halign == "right"))  return "end";
+                          return "start";
                     })
                     .attr("font-size",   (d: any) => { return textSize(d, scale, h_text_size) + "px" })
                     .attr("fill",        (d: any) => { 
-                        return d.data.text_color == null ? d3.hsl(this.h_text_color[0], this.h_text_color[1], this.h_text_color[2], this.h_text_color[3]) : d3.hsl(
-                            d.data.text_color.h == null ? this.h_text_color[0] : d.data.text_color.h, 
-                            d.data.text_color.s == null ? this.h_text_color[1] : d.data.text_color.s, 
-                            d.data.text_color.l == null ? this.h_text_color[2] : d.data.text_color.l, 
-                            d.data.text_color.a == null ? this.h_text_color[3] : d.data.text_color.a)
+                        return d.data.text_color == null ? d3.hsl(this.h_text_color[0], this.h_text_color[1], this.h_text_color[2], this.h_text_color[3]).toString() : 
+                            d3.hsl(
+                                d.data.text_color.h == null ? this.h_text_color[0] : d.data.text_color.h, 
+                                d.data.text_color.s == null ? this.h_text_color[1] : d.data.text_color.s, 
+                                d.data.text_color.l == null ? this.h_text_color[2] : d.data.text_color.l, 
+                                d.data.text_color.a == null ? this.h_text_color[3] : d.data.text_color.a).toString()
                     })
                     .attr("opacity",     (d: any) => { return ((h_text_size + h_text_padding < textSize(d, scale, h_text_size)) || (d.x1 - d.x0 < textSize(d, scale, h_text_size))) ? 0 : 1 })
                     .text((d: any) => { return d.data.name; })
@@ -556,25 +575,29 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     .append("title").text((d: any) => { return d.data.name; });
         }
 
-        function textPadding(d, scale, padding) { 
+        function textPadding(d: any, scale: number, padding: number) { 
             return d.data.text_padding == null ? padding : scale * d.data.text_padding; 
         }
 
-        function textSize(d, scale, fontsize) { 
+        function textSize(d: any, scale: number, fontsize: number) { 
             return d.data.text_size == null ? fontsize : scale * d.data.text_size; 
         }
 
-        function wrap(text) {
+        function checkWidth(tspan: any, width: number) {
+            if (tspan.node() == null) return true;
+            else return (tspan.node().getComputedTextLength() > width);
+        }
+
+        function wrap(text: any) {
             text.each(function() {
                 var text = d3.select(this),
                     //words = text.text().split(/\s+/).reverse(),
-                    //words = text.text().split(/([_\W])/).reverse(),
                     words = text.text().split(/([_-\s])/).reverse(),
                     word,
                     longline,
                     fraction,
                     i,
-                    line = [],
+                    line: string[] = [],
                     lineNumber = 0,
                     lineHeight = 1.1, // ems
                     wordcount  = 0,
@@ -593,9 +616,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                                 .attr("dy", dy + "em");
 
                 words = words.filter(function(t) { return t != ""; });
-                //console.log(words);
                 while (word = words.pop()) {
-                    //console.log(word);
                     // add a word to the line
                     line.push(word);
                     wordcount++;
@@ -605,7 +626,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                         tspan.text(line.join(""));
 
                         // if the current line is too long to fit then remove the last word added
-                        while (tspan.node().getComputedTextLength() > width && !overflow) {
+                        while (checkWidth(tspan, width) && !overflow) {
 
                             // remove the word that made the line too long
                             line.pop();
@@ -618,7 +639,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
                                 // find the largest fraction of the word that will fit
                                 fraction = 1;
-                                while (tspan.node().getComputedTextLength() > width && tspan.text().length > 2) {
+                                while (checkWidth(tspan, width) && tspan.text().length > 2) {
                                     fraction++;
                                     tspan.text(longline.substring(0, longline.length/fraction));
                                 }
@@ -638,10 +659,10 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                                             .text(word);
                                 
                                 // if we are on the last word and it is too long, break it apart
-                                if (words.length == 0 && tspan.node().getComputedTextLength() > width) {
+                                if (words.length == 0 && checkWidth(tspan, width)) {
                                     longline = tspan.text();
                                     fraction = 1;
-                                    while (tspan.node().getComputedTextLength() > width && tspan.text().length > 1) {
+                                    while (checkWidth(tspan, width) && tspan.text().length > 1) {
                                         fraction++;
                                         tspan.text(longline.substring(0, longline.length/fraction));
                                     }
@@ -665,7 +686,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     tspan.text(tspan.text() + "...");
                 }
                 if (lineNumber > 0) {
-                    var startDy;
+                    var startDy: number;
                     if (valign == "top") startDy = 0;
                     if (valign == "center") startDy = -0.5 * lineNumber * lineHeight;
                     if (valign == "bottom") startDy = -lineNumber * lineHeight;
@@ -674,15 +695,15 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             });
         }
 
-        function ellipse(text) {
+        function ellipse(text: any) {
             text.each(function() {
                 var text = d3.select(this);
                 var width = parseFloat(text.attr("width"));
                 var original = text.text();
                 var tspan = text.text("").append("tspan").text(original);
-                if (tspan.node().getComputedTextLength() <= width) return;
+                if (!checkWidth(tspan, width)) return;
                 tspan.text(original + "...");
-                while (tspan.node().getComputedTextLength() > width & tspan.text().length > 3) {
+                while (checkWidth(tspan, width) && tspan.text().length > 3) {
                     tspan.text(tspan.text().substring(0, tspan.text().length - 4) + "...");
                 }
             });

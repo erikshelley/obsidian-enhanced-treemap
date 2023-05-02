@@ -1,39 +1,40 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
+import EnhancedTreemapPlugin from './main';
 
 export interface EnhancedTreemapSettings {
-    aspect_w:       float;
-    aspect_h:       float;
+    aspect_w:       number;
+    aspect_h:       number;
 
     // Treemap Settings
-    aspect_ratio:   float;
-    outer_padding:  float;
-    fixed_width:    bool;
-    h_shadow_size:  float;
-    h_text_padding: float;
-    shadow_size:    float;
-    show_headers:   bool;
-    show_values:    bool;
-    sort_by_value:  bool;
-    width:          float;
+    aspect_ratio:   number;
+    outer_padding:  number;
+    fixed_width:    boolean;
+    h_shadow_size:  number;
+    h_text_padding: number;
+    shadow_size:    number;
+    show_headers:   boolean;
+    show_values:    boolean;
+    sort_by_value:  boolean;
+    width:          number;
 
     // Header Settings
-    h_border_color: Array<float>;
-    h_fill:         Array<float>;
+    h_border_color: Array<number>;
+    h_fill:         Array<number>;
     h_halign:       string;
-    h_shading:      bool;
-    h_shadow:       bool;
-    h_text_color:   Array<float>;
-    h_text_size:    float;
+    h_shading:      boolean;
+    h_shadow:       boolean;
+    h_text_color:   Array<number>;
+    h_text_size:    number;
 
     // Cell Settings
-    border_color:   Array<float>;
-    fill:           Array<float>;
+    border_color:   Array<number>;
+    fill:           Array<number>;
     halign:         string;
-    shading:        bool;
-    shadow:         bool;
-    text_color:     Array<float>;
-    text_padding:   float;
-    text_size:      float;
+    shading:        boolean;
+    shadow:         boolean;
+    text_color:     Array<number>;
+    text_padding:   number;
+    text_size:      number;
     valign:         string;
 
 }
@@ -85,6 +86,22 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
+    getHSLA(setting: Array<number>): string {
+        return setting[0] + ", " + setting[1] + ", " + setting[2] + ", " + setting[3];
+    }
+
+    setHSLA(value: string, setting: Array<number>): void {
+        var values = value.split(", ");
+        var h: number = parseFloat(values[0]);
+        var s: number = parseFloat(values[1]);
+        var l: number = parseFloat(values[2]);
+        var a: number = parseFloat(values[3]);
+        if (h >= 0 && h <= 360) setting[0] = h;
+        if (s >= 0 && s <= 1) setting[1] = s;
+        if (l >= 0 && l <= 1) setting[2] = l;
+        if (a >= 0 && a <= 1) setting[3] = a;
+    }
+
     display(): void {
         const { containerEl } = this;
 
@@ -100,10 +117,12 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.aspect_w.toString() + ":" + this.plugin.settings.aspect_h.toString())
                 .onChange(async (value) => {
                     var ratio = value.split(":");
-                    if (ratio[0] > 0 && ratio[1] > 0) {
-                        this.plugin.settings.aspect_w = ratio[0];
-                        this.plugin.settings.aspect_h = ratio[1];
-                        this.plugin.settings.aspect = ratio[0] / ratio[1];
+                    var w: number = parseFloat(ratio[0]);
+                    var h: number = parseFloat(ratio[1]);
+                    if (w > 0 && h > 0) {
+                        this.plugin.settings.aspect_w = w;
+                        this.plugin.settings.aspect_h = h;
+                        this.plugin.settings.aspect_ratio = w / h;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -124,8 +143,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.width.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.width = value;
+                    var w: number = parseFloat(value);
+                    if (w > 0) {
+                        this.plugin.settings.width = w;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -166,8 +186,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.h_text_size.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.h_text_size = value;
+                    var size: number = parseFloat(value);
+                    if (size > 0) {
+                        this.plugin.settings.h_text_size = size;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -178,8 +199,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.text_size.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.text_size = value;
+                    var size: number = parseFloat(value);
+                    if (size > 0) {
+                        this.plugin.settings.text_size = size;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -194,8 +216,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.h_shadow_size.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.h_shadow_size = value;
+                    var size: number = parseFloat(value);
+                    if (size > 0) {
+                        this.plugin.settings.h_shadow_size = size;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -206,8 +229,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.shadow_size.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.shadow_size = value;
+                    var size: number = parseFloat(value);
+                    if (size > 0) {
+                        this.plugin.settings.shadow_size = size;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -260,16 +284,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .setName("Header Border Color")
             .setDesc("Default Hue, Saturation, Lightness and Alpha (Transparency) for Header Borders")
             .addText((text) => {
-                var hsla = this.plugin.settings.h_border_color[0] + ", ";
-                hsla += this.plugin.settings.h_border_color[1] + ", ";
-                hsla += this.plugin.settings.h_border_color[2] + ", ";
-                hsla += this.plugin.settings.h_border_color[3];
-                text.setValue(hsla).onChange(async (v) => {
-                    var values = v.split(", ");
-                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.h_border_color[0] = values[0];
-                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.h_border_color[1] = values[1];
-                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.h_border_color[2] = values[2];
-                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.h_border_color[3] = values[3];
+                var hsla = this.getHSLA(this.plugin.settings.h_border_color);
+                text.setValue(hsla).onChange(async (value) => {
+                    this.setHSLA(value, this.plugin.settings.h_border_color);
                     await this.plugin.saveSettings();
                 });
             });
@@ -278,16 +295,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .setName("Cell Border Color")
             .setDesc("Default Hue, Saturation, Lightness and Alpha (Transparency) for Cell Borders")
             .addText((text) => {
-                var hsla = this.plugin.settings.border_color[0] + ", ";
-                hsla += this.plugin.settings.border_color[1] + ", ";
-                hsla += this.plugin.settings.border_color[2] + ", ";
-                hsla += this.plugin.settings.border_color[3];
-                text.setValue(hsla).onChange(async (v) => {
-                    var values = v.split(", ");
-                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.border_color[0] = values[0];
-                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.border_color[1] = values[1];
-                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.border_color[2] = values[2];
-                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.border_color[3] = values[3];
+                var hsla = this.getHSLA(this.plugin.settings.border_color);
+                text.setValue(hsla).onChange(async (value) => {
+                    this.setHSLA(value, this.plugin.settings.border_color);
                     await this.plugin.saveSettings();
                 });
             });
@@ -296,16 +306,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .setName("Header Fill Color")
             .setDesc("Default Hue, Saturation, Lightness and Alpha (Transparency) for Filling Headers")
             .addText((text) => {
-                var hsla = this.plugin.settings.h_fill[0] + ", ";
-                hsla += this.plugin.settings.h_fill[1] + ", ";
-                hsla += this.plugin.settings.h_fill[2] + ", ";
-                hsla += this.plugin.settings.h_fill[3];
-                text.setValue(hsla).onChange(async (v) => {
-                    var values = v.split(", ");
-                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.h_fill[0] = values[0];
-                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.h_fill[1] = values[1];
-                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.h_fill[2] = values[2];
-                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.h_fill[3] = values[3];
+                var hsla = this.getHSLA(this.plugin.settings.h_fill);
+                text.setValue(hsla).onChange(async (value) => {
+                    this.setHSLA(value, this.plugin.settings.h_fill);
                     await this.plugin.saveSettings();
                 });
             });
@@ -314,16 +317,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .setName("Cell Fill Color")
             .setDesc("Default Hue, Saturation, Lightness and Alpha (Transparency) for Filling Cells")
             .addText((text) => {
-                var hsla = this.plugin.settings.fill[0] + ", ";
-                hsla += this.plugin.settings.fill[1] + ", ";
-                hsla += this.plugin.settings.fill[2] + ", ";
-                hsla += this.plugin.settings.fill[3];
-                text.setValue(hsla).onChange(async (v) => {
-                    var values = v.split(", ");
-                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.fill[0] = values[0];
-                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.fill[1] = values[1];
-                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.fill[2] = values[2];
-                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.fill[3] = values[3];
+                var hsla = this.getHSLA(this.plugin.settings.fill);
+                text.setValue(hsla).onChange(async (value) => {
+                    this.setHSLA(value, this.plugin.settings.fill);
                     await this.plugin.saveSettings();
                 });
             });
@@ -332,16 +328,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .setName("Header Text Color")
             .setDesc("Default Hue, Saturation, Lightness and Alpha (Transparency) for Header Text")
             .addText((text) => {
-                var hsla = this.plugin.settings.h_text_color[0] + ", ";
-                hsla += this.plugin.settings.h_text_color[1] + ", ";
-                hsla += this.plugin.settings.h_text_color[2] + ", ";
-                hsla += this.plugin.settings.h_text_color[3];
-                text.setValue(hsla).onChange(async (v) => {
-                    var values = v.split(", ");
-                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.h_text_color[0] = values[0];
-                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.h_text_color[1] = values[1];
-                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.h_text_color[2] = values[2];
-                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.h_text_color[3] = values[3];
+                var hsla = this.getHSLA(this.plugin.settings.h_text_color);
+                text.setValue(hsla).onChange(async (value) => {
+                    this.setHSLA(value, this.plugin.settings.h_text_color);
                     await this.plugin.saveSettings();
                 });
             });
@@ -350,16 +339,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .setName("Cell Text Color")
             .setDesc("Default Hue, Saturation, Lightness and Alpha (Transparency) for Cell Text")
             .addText((text) => {
-                var hsla = this.plugin.settings.text_color[0] + ", ";
-                hsla += this.plugin.settings.text_color[1] + ", ";
-                hsla += this.plugin.settings.text_color[2] + ", ";
-                hsla += this.plugin.settings.text_color[3];
-                text.setValue(hsla).onChange(async (v) => {
-                    var values = v.split(", ");
-                    if (values[0] >= 0 && values[0] <= 360) this.plugin.settings.text_color[0] = values[0];
-                    if (values[1] >= 0 && values[1] <= 1) this.plugin.settings.text_color[1] = values[1];
-                    if (values[2] >= 0 && values[2] <= 1) this.plugin.settings.text_color[2] = values[2];
-                    if (values[3] >= 0 && values[3] <= 1) this.plugin.settings.text_color[3] = values[3];
+                var hsla = this.getHSLA(this.plugin.settings.text_color);
+                text.setValue(hsla).onChange(async (value) => {
+                    this.setHSLA(value, this.plugin.settings.text_color);
                     await this.plugin.saveSettings();
                 });
             });
@@ -374,8 +356,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.outer_padding.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.outer_padding = value;
+                    var padding: number = parseFloat(value);
+                    if (padding > 0) {
+                        this.plugin.settings.outer_padding = padding;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -386,8 +369,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.h_text_padding.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.h_text_padding = value;
+                    var padding: number = parseFloat(value);
+                    if (padding > 0) {
+                        this.plugin.settings.h_text_padding = padding;
                         await this.plugin.saveSettings();
                     }
                 }));
@@ -398,8 +382,9 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(this.plugin.settings.text_padding.toString())
                 .onChange(async (value) => {
-                    if (value > 0) {
-                        this.plugin.settings.text_padding = value;
+                    var padding: number = parseFloat(value);
+                    if (padding > 0) {
+                        this.plugin.settings.text_padding = padding;
                         await this.plugin.saveSettings();
                     }
                 }));
