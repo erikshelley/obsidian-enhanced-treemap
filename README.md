@@ -75,39 +75,69 @@ The treemap below describes all of the available settings for the Enhanced Treem
 | `"aspect_ratio": "1:4"` | the treemap will have a height four times as large as its width |
 
 #### fixed_width
-Use this setting to determine if the treemap has a fixed or adaptive width.
-- **Valid Values:** true, false
-- `"fixed_width": true` the treemap will have a fixed width
-- `"fixed_width": false` the treemap will fill the available width
+    
+    Use this setting to determine if the treemap has a fixed or adaptive width.
+    Valid values: true, false
+    
+| Example                 | Result                                    |
+| -------                 | ------                                    |
+| `"fixed_width": true`   | the treemap will have a fixed width       |
+| `"fixed_width": false`  | the treemap will fill the available width |
 
 #### width
-Use this setting to change the width of the treemap.
-- **Valid Values:** a positive number
-- `"width": 500` the treemap will be 500 pixels wide if `fixed_width` is true
+    
+    Use this setting to change the width of the treemap.
+    Valid values: a positive number
+    
+| Example        | Result                                                       |
+| -------        | ------                                                       |
+| `"width": 500` | the treemap will be 500 pixels wide if `fixed_width` is true |
 
 #### show_headers
-Use this setting to show or hide headers/branches in the treemap.
-- **Valid Values:** true, false
-- `"show_headers": true` the treemap will include space for headers and show header text
-- `"show_headers": false` the treemap will not include space for headers and will not show header text
 
-**Put an Example Here**
+    Use this setting to show or hide headers/branches in the treemap.
+    Valid values: true, false
+ 
+| Example                 | Result                                                                       |
+| -------                 | ------                                                                       |
+| `"show_headers": true`  | the treemap will include space for headers and show header text              |
+| `"show_headers": false` | the treemap will not include space for headers and will not show header text |
 
 #### show_values
-Use this setting to show or hide values in the cells/leaves of the treemap.
-- **Valid Values:** true, false
-- `"show_values": true` the treemap will include values in the cells/leaves of the treemap
-- `"show_values": false` the treemap will not include values in the cells/leaves of the treemap
 
-**Put an Example Here**
+    Use this setting to show or hide values in the cells/leaves of the treemap.
+    The value is added before the text in each cell.
+    Valid values: true, false
+    
+| Example                 | Result                                                                       |
+| -------                 | ------                                                                       |
+| `"show_values": true`   | the treemap will include values in the cells/leaves of the treemap           |
+| `"show_values": false`  | the treemap will not include values in the cells/leaves of the treemap       |
 
 #### sort_by_value
-Use this setting to change how the treemap cells are sorted.
-- **Valid Values:** true, false
-- `"sort_by_value": true` the treemap cells will be sorted by value (largest values first)
-- `"sort_by_value": false` the treemap cells will remain in the order they appear in the code block
+
+    Use this setting to change how the treemap cells are sorted.
+    Valid values: true, false
+    
+| Example                  | Result                                                                   |
+| -------                  | ------                                                                   |
+| `"sort_by_value": true`  | the treemap cells will be sorted by value (largest values first)         |
+| `"sort_by_value": false` | the treemap cells will remain in the order they appear in the code block |
 
 #### text_size & h_text_size
+
+    Use this setting to change the font size used for text.
+    In the `settings` section of a treemap
+    - use `h_text_size` to set the text size for headers
+    - use `text_size` to set the text size for cells
+    When updating this setting for individual headers or cells use `text_size` in both cases.
+
+| Example             | Result                                                                          |
+| -------             | ------                                                                          |
+| `"h_text_size": 16` | Set the text size for headers to 16px (only applicable in `settings` section)   |
+| `"text_size": 14`   | Set the text size for cells to 14px (if used in `settings` section)             |
+| `"text_size": 14`   | Set the text size for a header to 14px (if used within a header node)           |
+| `"text_size": 14`   | Set the text size for a cell to 14px (if used within a cell node)               |
 
 ### Padding
 #### outer_padding
