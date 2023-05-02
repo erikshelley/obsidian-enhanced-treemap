@@ -133,12 +133,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
     When updating this setting for individual headers or cells use `text_size` even for headers.
     Valid values: a positive number
 
-| Example             | Result                                                                        |
-| -------             | ------                                                                        |
-| `"h_text_size": 16` | Set the text size for headers to 16px (only applicable in `settings` section) |
-| `"text_size": 14`   | Set the text size for cells to 14px (if used in `settings` section)           |
-| `"text_size": 14`   | Set the text size for a header to 14px (if used within a header node)         |
-| `"text_size": 14`   | Set the text size for a cell to 14px (if used within a cell node)             |
+| Example             | Result                                                                            |
+| -------             | ------                                                                            |
+| `"h_text_size": 16` | Set the text size for all headers to 16px (only applicable in `settings` section) |
+| `"text_size": 14`   | Set the text size for all cells to 14px (if used in `settings` section)           |
+| `"text_size": 14`   | Set the text size for a header to 14px (if used within a header node)             |
+| `"text_size": 14`   | Set the text size for a cell to 14px (if used within a cell node)                 |
 
 
 ### Padding Settings
@@ -147,10 +147,10 @@ The treemap below describes all of the available settings for the Enhanced Treem
     Use this setting to change the amount of padding around headers and cells.
     Valid values: a positive number or zero
 
-| Example              | Result                                                       |
-| -------              | ------                                                       |
-| `"outer_padding": 8` | Set the padding around cells and headers to 8px              |
-| `"outer_padding": 0` | Set the padding around cells and headers to 0px (no padding) |
+| Example              | Result                                                           |
+| -------              | ------                                                           |
+| `"outer_padding": 8` | Set the padding around all cells and headers to 8px              |
+| `"outer_padding": 0` | Set the padding around all cells and headers to 0px (no padding) |
 
 #### text_padding & h_text_padding
 
@@ -161,12 +161,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
     When updating this setting for individual headers or cells use `text_padding` even for headers.
     Valid values: a positive number or zero
 
-| Example               | Result                                                                          |
-| -------               | ------                                                                          |
-| `"h_text_padding": 6` | Set the text padding for headers to 6px (only applicable in `settings` section) |
-| `"text_padding": 4`   | Set the text padding for cells to 4px (if used in `settings` section)           |
-| `"text_padding": 4`   | Set the text padding for a header to 4px (if used within a header node)         |
-| `"text_padding": 4`   | Set the text padding for a cell to 4px (if used within a cell node)             |
+| Example               | Result                                                                              |
+| -------               | ------                                                                              |
+| `"h_text_padding": 6` | Set the text padding for all headers to 6px (only applicable in `settings` section) |
+| `"text_padding": 4`   | Set the text padding for all cells to 4px (if used in `settings` section)           |
+| `"text_padding": 4`   | Set the text padding for a header to 4px (if used within a header node)             |
+| `"text_padding": 4`   | Set the text padding for a cell to 4px (if used within a cell node)                 |
 
 
 ### Shading & Shadows Settings
@@ -179,12 +179,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
     When updating this setting for individual headers or cells use `shading` even for headers.
     Valid values: true or false
 
-| Example             | Result                                                             |
-| -------             | ------                                                             |
-| `"h_shading": true` | Enable shading for headers (only applicable in `settings` section) |
-| `"shading": true`   | Enable shading for cells (if used in `settings` section)           |
-| `"shading": false`  | Disable shading for a header (if used within a header node)        |
-| `"shading": false`  | Disable shading for a cell (if used within a cell node)            |
+| Example             | Result                                                                 |
+| -------             | ------                                                                 |
+| `"h_shading": true` | Enable shading for all headers (only applicable in `settings` section) |
+| `"shading": true`   | Enable shading for all cells (if used in `settings` section)           |
+| `"shading": false`  | Disable shading for a header (if used within a header node)            |
+| `"shading": false`  | Disable shading for a cell (if used within a cell node)                |
 
 #### shadow & h_shadow
 
@@ -195,12 +195,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
     When updating this setting for individual headers or cells use `shadow` even for headers.
     Valid values: true or false
 
-| Example            | Result                                                                  |
-| -------            | ------                                                                  |
-| `"h_shadow": true` | Enable drop shadows for headers (only applicable in `settings` section) |
-| `"shadow": true`   | Enable drop shadows for cells (if used in `settings` section)           |
-| `"shadow": false`  | Disable drop shadows for a header (if used within a header node)        |
-| `"shadow": false`  | Disable drop shadows for a cell (if used within a cell node)            |
+| Example            | Result                                                                      |
+| -------            | ------                                                                      |
+| `"h_shadow": true` | Enable drop shadows for all headers (only applicable in `settings` section) |
+| `"shadow": true`   | Enable drop shadows for all cells (if used in `settings` section)           |
+| `"shadow": false`  | Disable drop shadows for a header (if used within a header node)            |
+| `"shadow": false`  | Disable drop shadows for a cell (if used within a cell node)                |
 
 #### shadow_size & h_shadow_size
 
@@ -211,15 +211,16 @@ The treemap below describes all of the available settings for the Enhanced Treem
     When updating this setting for individual headers or cells use `shadow_size` even for headers.
     Valid values: a positive number or zero
 
-| Example              | Result                                                                              |
-| -------              | ------                                                                              |
-| `"h_shadow_size": 3` | Set the drop shadow size for headers to 3px (only applicable in `settings` section) |
-| `"shadow_size": 3`   | Set the drop shadow size for cells to 3px (if used in `settings` section)           |
-| `"shadow_size": 3`   | Set the drop shadow size for a header to 3px (if used within a header node)         |
-| `"shadow_size": 3`   | Set the drop shadow size for a cell to 3px (if used within a cell node)             |
+| Example              | Result                                                                                  |
+| -------              | ------                                                                                  |
+| `"h_shadow_size": 3` | Set the drop shadow size for all headers to 3px (only applicable in `settings` section) |
+| `"shadow_size": 3`   | Set the drop shadow size for all cells to 3px (if used in `settings` section)           |
+| `"shadow_size": 3`   | Set the drop shadow size for a header to 3px (if used within a header node)             |
+| `"shadow_size": 3`   | Set the drop shadow size for a cell to 3px (if used within a cell node)                 |
 
 
 ### Color Settings
+#### border_color & h_border_color
 
     Use this setting to change the border color for headers and cells.
     In the `settings` section of a treemap
@@ -234,20 +235,87 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 <img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
 
-| Example                                                 | Result                                                                                                               |
-| -------                                                 | ------                                                                                                               |
-| `"h_border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }` | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for header borders (only applicable in`settings` section) |
-| `"border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`   | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for cell borders (if used in `settings` section)          |
-| `"border_color": { "l":1 }`                             | Sets lightness = 100% for applicable border (hue, saturation and alpha are unchanged)                                |
-| `"border_color": { "s":0, "a":0.5 }`                    | Sets saturation = 0 and alpha = 50% for applicable border (hue and lightness are unchanged)                          |
+| Example                                                 | Result                                                                                                                   |
+| -------                                                 | ------                                                                                                                   |
+| `"h_border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }` | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for all header borders (only applicable in`settings` section) |
+| `"border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`   | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for all cell borders (if used in `settings` section)          |
+| `"border_color": { "l":1 }`                             | Sets lightness = 100% for applicable border (hue, saturation and alpha are unchanged)                                    |
+| `"border_color": { "s":0, "a":0.5 }`                    | Sets saturation = 0 and alpha = 50% for applicable border (hue and lightness are unchanged)                              |
 
-#### border_color & h_border_color
 #### fill & h_fill
+
+    Use this setting to change the fill color for headers and cells.
+    In the `settings` section of a treemap
+        - use `h_fill` to set the fill color for headers
+        - use `fill` to set the fill color for cells
+    When updating this setting for individual headers or cells use `fill` even for headers.
+    Valid values: a set containing any of the following elements:
+        - h: a number from 0 to 360 to specify the hue (see image below)
+        - s: a number from 0 to 1 to specify the saturation
+        - l: a number from 0 to 1 to specify the lightness
+        - a: a number from 0 to 1 to specify the alpha/transparency
+
+<img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
+
+| Example                                         | Result                                                                                                                       |
+| -------                                         | ------                                                                                                                       |
+| `"h_fill": { "h":20, "s":0.5, "l":0.2, "a":1 }` | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for filling all headers (only applicable in`settings` section)    |
+| `"fill": { "h":20, "s":0.5, "l":0.2, "a":1 }`   | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for filling all cells (if used in `settings` section)             |
+| `"fill": { "l":1 }`                             | Sets lightness = 100% for filling applicable header or cell (hue, saturation and alpha are unchanged)                        |
+| `"fill": { "s":0, "a":0.5 }`                    | Sets saturation = 0 and alpha = 50% for filling applicable header or cell (hue and lightness are unchanged)                  |
+|                                                 |                                                                                                                              |
+
 #### text_color & h_text_color
+
+    Use this setting to change the text color for headers and cells.
+    In the `settings` section of a treemap
+        - use `h_text_color` to set the text color for headers
+        - use `text_color` to set the text color for cells
+    When updating this setting for individual headers or cells use `text_color` even for headers.
+    Valid values: a set containing any of the following elements:
+        - h: a number from 0 to 360 to specify the hue (see image below)
+        - s: a number from 0 to 1 to specify the saturation
+        - l: a number from 0 to 1 to specify the lightness
+        - a: a number from 0 to 1 to specify the alpha/transparency
+
+<img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
+
+| Example                                               | Result                                                                                                                |
+| -------                                               | ------                                                                                                                |
+| `"h_text_color": { "h":20, "s":0.5, "l":0.2, "a":1 }` | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for all header text (only applicable in`settings` section) |
+| `"text_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`   | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for all cell text (if used in `settings` section)          |
+| `"text_color": { "l":1 }`                             | Sets lightness = 100% for applicable text (hue, saturation and alpha are unchanged)                                   |
+| `"text_color": { "s":0, "a":0.5 }`                    | Sets saturation = 0 and alpha = 50% for applicable text (hue and lightness are unchanged)                             |
+
 
 ### Alignment Settings
 #### halign & h_halign
+
+    Use this setting to change the horizontal alignment of text within headers and cells.
+    In the `settings` section of a treemap
+        - use `h_halign` to set the text padding for headers
+        - use `halign` to set the text padding for cells
+    When updating this setting for individual headers or cells use `halign` even for headers.
+    Valid values: "left", "center" or "right"
+
+| Example                | Result                                                                     |
+| -------                | ------                                                                     |
+| `"h_halign": "center"` | Center aligns text for all headers (only applicable in `settings` section) |
+| `"halign": "center"`   | Center aligns text for all cells (if used in `settings` section)           |
+| `"halign": "right"`    | Right aligns text for a header (if used within a header node)              |
+| `"halign": "right"`    | Right aligns text for a cell (if used within a cell node)                  |
+
 #### valign
+
+    Use this setting to change the vertical alignment of text within cells.
+    There is no vertical alignment setting for headers.
+    Valid values: "top", "center" or "bottom"
+
+| Example              | Result                                                               |
+| -------              | ------                                                               |
+| `"valign": "center"` | Centers text vertically in all cells (if used in `settings` section) |
+| `"valign": "bottom"` | Moves text to the bottom of a cell (if used within a cell node)      |
+
 
 
 ## Releasing new releases
