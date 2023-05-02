@@ -66,8 +66,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### aspect_ratio
     
 > Use this setting to change the ratio of the width to the height for the treemap.
-> - Valid values: a string containing two positive numbers separated by a colon.
-> - Examples:
+> - **Valid Values:** a string containing two positive numbers separated by a colon.
+> - **Examples:**
 >     - `"aspect_ratio": "1:1"`
 >         - the treemap will be square
 >     - `"aspect_ratio": "2:1"`
@@ -78,8 +78,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### fixed_width
     
 > Use this setting to determine if the treemap has a fixed or adaptive width.
-> - Valid values: true, false
-> - Examples:
+> - **Valid Values:** true, false
+> - **Examples:**
 >     - `"fixed_width": true`
 >         - the treemap will have a fixed width
 >     - `"fixed_width": false`
@@ -88,16 +88,16 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### width
     
 > Use this setting to change the width of the treemap if fixed_sidth is true.
-> - Valid values: a positive number
-> - Examples:
+> - **Valid Values:** a positive number
+> - **Examples:**
 >     - `"width": 500`
 >         - the treemap will be 500 pixels wide if `fixed_width` is true
 
 #### show_headers
 
 > Use this setting to show or hide headers/branches and their text in the treemap.
-> - Valid values: true, false
-> - Examples:
+> - **Valid Values:** true, false
+> - **Examples:**
 >     - `"show_headers": true`
 >         - the treemap will include space for headers and will show header text
 >     - `"show_headers": false`
@@ -106,8 +106,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### show_values
 
 > Use this setting to show or hide values in the cells/leaves of the treemap. The value is added before the text in each cell.
-> - Valid values: true, false
-> - Examples:
+> - **Valid Values:** true, false
+> - **Examples:**
 >     - `"show_values": true`
 >         - the treemap will include values in the cells/leaves of the treemap
 >     - `"show_values": false`
@@ -116,8 +116,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### sort_by_value
 
 > Use this setting to change how the treemap cells are sorted.
-> - Valid values: true, false
-> - Examples:
+> - **Valid Values:** true, false
+> - **Examples:**
 >     - `"sort_by_value": true`
 >         - the treemap cells will be sorted by value (largest values first)
 >     - `"sort_by_value": false`
@@ -132,8 +132,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `text_size` to set the text size for cells
 >
 > When updating this setting for individual headers or cells use `text_size` even for headers.
-> - Valid values: a positive number
-> - Examples:
+> - **Valid Values:** a positive number
+> - **Examples:**
 >     - `"h_text_size": 16`
 >         - Set the text size for all headers to 16px (only applicable in `settings` section)
 >     - `"text_size": 14`
@@ -148,8 +148,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### outer_padding
 
 > Use this setting to change the amount of padding around headers and cells.
-> Valid values: a positive number or zero
-> - Examples:
+> **Valid Values:** a positive number or zero
+> - **Examples:**
 >     - `"outer_padding": 8`
 >         - Set the padding around all cells and headers to 8px
 >     - `"outer_padding": 0`
@@ -164,8 +164,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `text_padding` to set the text padding for cells
 >
 > When updating this setting for individual headers or cells use `text_padding` even for headers.
-> - Valid values: a positive number or zero
-> - Examples:
+> - **Valid Values:** a positive number or zero
+> - **Examples:**
 >     - `"h_text_padding": 6`
 >         - Set the text padding for all headers to 6px (only applicable in `settings` section)
 >     - `"text_padding": 4`
@@ -180,12 +180,14 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### shading & h_shading
 
 > Use this setting to turn on/off header and cell shading.
+>
 > In the `settings` section of a treemap
 > - use `h_shading` to set the shading for headers
 > - use `shading` to set the shading for cells
+>
 > When updating this setting for individual headers or cells use `shading` even for headers.
-> - Valid values: true or false
-> - Examples:
+> - **Valid Values:** true or false
+> - **Examples:**
 >     - `"h_shading": true`
 >         - Enable shading for all headers (only applicable in `settings` section)
 >     - `"shading": true`
@@ -204,8 +206,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `shadow` to set drop shadows for cells
 >
 > When updating this setting for individual headers or cells use `shadow` even for headers.
-> - Valid values: true or false
-> - Examples:
+> - **Valid Values:** true or false
+> - **Examples:**
 >     - `"h_shadow": true`
 >         - Enable drop shadows for all headers (only applicable in `settings` section)
 >     - `"shadow": true`
@@ -224,8 +226,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `shadow_size` to set the drop shadow size for cells
 >
 > When updating this setting for individual headers or cells use `shadow_size` even for headers.
-> - Valid values: a positive number or zero
-> - Examples:
+> - **Valid Values:** a positive number or zero
+> - **Examples:**
 >     - `"h_shadow_size": 3`
 >         - Set the drop shadow size for all headers to 3px (only applicable in `settings` section)
 >     - `"shadow_size": 3`
@@ -246,12 +248,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `border_color` to set the border color for cells
 >
 > When updating this setting for individual headers or cells use `border_color` even for headers.
-> - Valid values: a set containing any of the following elements:
+> - **Valid Values:** a set containing any of the following elements:
 >     - h: a number from 0 to 360 to specify the hue (see image below)
 >     - s: a number from 0 to 1 to specify the saturation
 >     - l: a number from 0 to 1 to specify the lightness
 >     - a: a number from 0 to 1 to specify the alpha/transparency
-> - Examples:
+> - **Examples:**
 >     - `"h_border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`
 >         - Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for all header borders (only applicable in`settings` section)
 >     - `"border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`
@@ -272,12 +274,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `fill` to set the fill color for cells
 >
 > When updating this setting for individual headers or cells use `fill` even for headers.
-> - Valid values: a set containing any of the following elements:
+> - **Valid Values:** a set containing any of the following elements:
 >     - h: a number from 0 to 360 to specify the hue (see image below)
 >     - s: a number from 0 to 1 to specify the saturation
 >     - l: a number from 0 to 1 to specify the lightness
 >     - a: a number from 0 to 1 to specify the alpha/transparency
-> - Examples:
+> - **Examples:**
 >     - `"h_fill": { "h":20, "s":0.5, "l":0.2, "a":1 }`
 >         - Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for filling all headers (only applicable in`settings` section)
 >     - `"fill": { "h":20, "s":0.5, "l":0.2, "a":1 }`
@@ -298,12 +300,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `text_color` to set the text color for cells
 >
 > When updating this setting for individual headers or cells use `text_color` even for headers.
-> - Valid values: a set containing any of the following elements:
+> - **Valid Values:** a set containing any of the following elements:
 >     - h: a number from 0 to 360 to specify the hue (see image below)
 >     - s: a number from 0 to 1 to specify the saturation
 >     - l: a number from 0 to 1 to specify the lightness
 >     - a: a number from 0 to 1 to specify the alpha/transparency
-> - Examples:
+> - **Examples:**
 >     - `"h_text_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`
 >         - Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for all header text (only applicable in `settings` section)
 >     - `"text_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`
@@ -326,8 +328,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 > - use `halign` to set the text padding for cells
 >
 > When updating this setting for individual headers or cells use `halign` even for headers.
-> - Valid values: "left", "center" or "right"
-> - Examples:
+> - **Valid Values:** "left", "center" or "right"
+> - **Examples:**
 >     - `"h_halign": "center"`
 >         - Center aligns text for all headers (only applicable in `settings` section)
 >     - `"halign": "center"`
@@ -340,8 +342,8 @@ The treemap below describes all of the available settings for the Enhanced Treem
 #### valign
 
 > Use this setting to change the vertical alignment of text within cells. There is no vertical alignment setting for headers.
-> - Valid values: "top", "center" or "bottom"
-> - Examples:
+> - **Valid Values:** "top", "center" or "bottom"
+> - **Examples:**
 >     - `"valign": "center"` 
 >         - Centers text vertically in all cells (if used in `settings` section)
 >     - `"valign": "bottom"`
