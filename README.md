@@ -4,16 +4,20 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 Treemaps are a useful way to visualize hierarchical data in a very compact form.
 Normally treemaps only show text for the leaves of the tree, however nested treemaps also show text for the branches.
 
-- [Simple Example](#simple-example)
-- [Complex Example](#complex-example)
+- [Examples](#examples)
+    - [Simple Example](#simple-example)
+    - [Complex Example](#complex-example)
 - [Settings](#settings)
-    - Size & Shape
-    - Padding
-    - Shading & Shadows
-    - Color
-    - Alignment
+    - [Size & Shape](#size--shape)
+    - [Padding](#padding)
+    - [Shading & Shadows](#shading--shadows)
+    - [Color](#color)
+    - [Alignment](#alignment)
 
-## Simple Example
+
+## Examples
+
+### Simple Example
 
 After installing and enabling the plugin, treemaps can be added to notes by creating JSON code blocks.
 The bare minimum requirements are:
@@ -41,15 +45,16 @@ The bare minimum requirements are:
 
 ![Simple Example Image](./examples/SimpleExample.png)
 
-## Complex Example
+### Complex Example
 
 The examples below compare a normal treemap with an enhanced treemap to demonstrate some of the available features. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
 
-### Normal Treemap
+#### Normal Treemap
 ![Complex Example Image 1](./examples/ComplexExample1.png)
 
-### Enhanced Treemap
+#### Enhanced Treemap
 ![Complex Example Image 2](./examples/ComplexExample2.png)
+
 
 ## Settings
 
@@ -83,6 +88,7 @@ The treemap below describes all of the available settings for the Enhanced Treem
 ### Alignment
 #### halign & h_halign
 #### valign
+
 
 ## Releasing new releases
 
