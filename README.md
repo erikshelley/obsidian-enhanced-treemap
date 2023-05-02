@@ -4,6 +4,7 @@ This is a data visualization plugin for [Obsidian](https://obsidian.md), based o
 Treemaps are a useful way to visualize hierarchical data in a very compact form.
 Normally treemaps only show text for the leaves of the tree, however nested treemaps also show text for the branches.
 
+- [Installation](#installation)
 - [Examples](#examples)
     - [Simple Example](#simple-example)
     - [Complex Example](#complex-example)
@@ -15,12 +16,21 @@ Normally treemaps only show text for the leaves of the tree, however nested tree
     - [Alignment](#alignment)
 
 
+## Installation
+
+1. Go to Community Plugins in your Obsidian Settings
+2. Turn off Restricted Mode
+3. Click on Browse
+4. Search for "Obsidian Enhanced Treemap"
+5. Click install
+6. Toggle the Plugin on in the Community Plugins Tab
+
 ## Examples
 
 ### Simple Example
 
 After installing and enabling the plugin, treemaps can be added to notes by creating JSON code blocks.
-The bare minimum requirements are:
+The minimum requirements are:
 - The code block must have the type `json`
 - The code block must contain valid JSON
 - The root node must have this element: `"type": "enhancedtreemap"`
@@ -239,6 +249,11 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 
 ### Color Settings
+Color is set using hsla: hue, saturation, lightness and alpha (transparency).
+Values for hue range from 0 to 360 as shown in the image below. All other values range from 0 to 1.
+
+<img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
+
 #### border_color & h_border_color
 
 > Use this setting to change the border color for headers and cells.
@@ -249,7 +264,7 @@ The treemap below describes all of the available settings for the Enhanced Treem
 >
 > When updating this setting for individual headers or cells use `border_color` even for headers.
 > - **Valid Values:** a set containing any of the following elements:
->     - h: a number from 0 to 360 to specify the hue (see image below)
+>     - h: a number from 0 to 360 to specify the hue
 >     - s: a number from 0 to 1 to specify the saturation
 >     - l: a number from 0 to 1 to specify the lightness
 >     - a: a number from 0 to 1 to specify the alpha/transparency
@@ -263,8 +278,6 @@ The treemap below describes all of the available settings for the Enhanced Treem
 >     - `"border_color": { "s":0, "a":0.5 }`
 >         - Sets saturation = 0 and alpha = 50% for applicable border (hue and lightness are unchanged)
 
-<img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
-
 #### fill & h_fill
 
 > Use this setting to change the fill color for headers and cells.
@@ -275,7 +288,7 @@ The treemap below describes all of the available settings for the Enhanced Treem
 >
 > When updating this setting for individual headers or cells use `fill` even for headers.
 > - **Valid Values:** a set containing any of the following elements:
->     - h: a number from 0 to 360 to specify the hue (see image below)
+>     - h: a number from 0 to 360 to specify the hue
 >     - s: a number from 0 to 1 to specify the saturation
 >     - l: a number from 0 to 1 to specify the lightness
 >     - a: a number from 0 to 1 to specify the alpha/transparency
@@ -289,8 +302,6 @@ The treemap below describes all of the available settings for the Enhanced Treem
 >     - `"fill": { "s":0, "a":0.5 }`
 >         - Sets saturation = 0 and alpha = 50% for filling applicable header or cell (hue and lightness are unchanged)
 
-<img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
-
 #### text_color & h_text_color
 
 > Use this setting to change the text color for headers and cells.
@@ -301,7 +312,7 @@ The treemap below describes all of the available settings for the Enhanced Treem
 >
 > When updating this setting for individual headers or cells use `text_color` even for headers.
 > - **Valid Values:** a set containing any of the following elements:
->     - h: a number from 0 to 360 to specify the hue (see image below)
+>     - h: a number from 0 to 360 to specify the hue
 >     - s: a number from 0 to 1 to specify the saturation
 >     - l: a number from 0 to 1 to specify the lightness
 >     - a: a number from 0 to 1 to specify the alpha/transparency
@@ -314,8 +325,6 @@ The treemap below describes all of the available settings for the Enhanced Treem
 >         - Sets lightness = 100% for applicable text (hue, saturation and alpha are unchanged)
 >     - `"text_color": { "s":0, "a":0.5 }`
 >         - Sets saturation = 0 and alpha = 50% for applicable text (hue and lightness are unchanged)
-
-<img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
 
 
 ### Alignment Settings
@@ -348,23 +357,4 @@ The treemap below describes all of the available settings for the Enhanced Treem
 >         - Centers text vertically in all cells (if used in `settings` section)
 >     - `"valign": "bottom"`
 >         - Moves text to the bottom of a cell (if used within a cell node)
-
-
-## Releasing new releases
-
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
 

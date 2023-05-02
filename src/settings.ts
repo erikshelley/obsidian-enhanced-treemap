@@ -77,7 +77,7 @@ export const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
 
 }
 
-export class SettingTab extends PluginSettingTab {
+export class EnhancedTreemapSettingTab extends PluginSettingTab {
     plugin: EnhancedTreemapPlugin;
 
     constructor(app: App, plugin: EnhancedTreemapPlugin) {

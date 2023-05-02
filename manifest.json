@@ -3,6 +3,6 @@
 	"name": "Obsidian Enhanced Treemap",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a plugin for Obsidian. This plugin allows for the creation of enhanced treemaps.",
+	"description": "This is an Obsidian (https://obsidian.md) plugin for creating enhanced treemaps.",
 	"author": "Erik Shelley"
 }

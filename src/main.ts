@@ -1,5 +1,5 @@
-import { App, Plugin, Setting } from 'obsidian';
-import { SettingTab, DEFAULT_SETTINGS } from './settings';
+import { App, Plugin, Setting, MarkdownView } from 'obsidian';
+import { EnhancedTreemapSettingTab, DEFAULT_SETTINGS } from './settings';
 import EnhancedTreemap from './enhancedtreemap';
 
 export default class EnhancedTreemapPlugin extends Plugin {
@@ -23,7 +23,7 @@ export default class EnhancedTreemapPlugin extends Plugin {
         await this.loadSettings();
         this.elements = [];
         this.contexts = [];
-        this.addSettingTab(new SettingTab(this.app, this));
+        this.addSettingTab(new EnhancedTreemapSettingTab(this.app, this));
         this.enhancedtreemap = new EnhancedTreemap(this);
         this.registerMarkdownPostProcessor((el, ctx) => { this.postprocessor(el, ctx) });
 
@@ -42,7 +42,10 @@ export default class EnhancedTreemapPlugin extends Plugin {
 
     async saveSettings() { 
         await this.saveData(this.settings); 
-        app.workspace.activeLeaf.rebuildView();
+        const view = app.workspace.getActiveViewOfType(MarkdownView);
+        if (view) {
+            if (view.leaf) view.leaf.rebuildView();
+        }
     }
 }
 
