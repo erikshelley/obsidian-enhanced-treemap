@@ -43,9 +43,12 @@ The bare minimum requirements are:
 
 ## Complex Example
 
-The examples below compare a simple treemap with an enhanced treemap to demonstrate some of the available features. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
+The examples below compare a normal treemap with an enhanced treemap to demonstrate some of the available features. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
 
+### Normal Treemap
 ![Complex Example Image 1](./examples/ComplexExample1.png)
+
+### Enhanced Treemap
 ![Complex Example Image 2](./examples/ComplexExample2.png)
 
 ## Settings
@@ -55,10 +58,31 @@ The treemap below describes all of the available settings for the Enhanced Treem
 ![Settings Image](./examples/Settings.png)
 
 ### Size & Shape
+#### aspect_ratio
+#### fixed_width
+#### width
+#### show_headers
+#### show_values
+#### sort_by_value
+#### text_size & h_text_size
+
 ### Padding
+#### outer_padding
+#### text_padding & h_text_padding
+
 ### Shading & Shadows
+#### shading & h_shading
+#### shadow & h_shadow
+#### shadow_size & h_shadow_size
+
 ### Color
+#### border_color & h_border_color
+#### fill & h_fill
+#### text_color & h_text_color
+
 ### Alignment
+#### halign & h_halign
+#### valign
 
 ## Releasing new releases
 
