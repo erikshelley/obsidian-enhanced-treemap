@@ -227,19 +227,19 @@ The treemap below describes all of the available settings for the Enhanced Treem
         - use `border_color` to set the border color for cells
     When updating this setting for individual headers or cells use `border_color` even for headers.
     Valid values: a set containing any of the following elements:
-        - h: a number from 0 to 360 to specify the hue
+        - h: a number from 0 to 360 to specify the hue (see image below)
         - s: a number from 0 to 1 to specify the saturation
         - l: a number from 0 to 1 to specify the lightness
         - a: a number from 0 to 1 to specify the alpha/transparency
 
-![Hue Image](./examples/2880px-HueScale.svg.png)
+<img src="./examples/2880px-HueScale.svg.png" alt="Hue Image" width="250" />
 
-| Example                                                 | Result                                                                                      |
-| -------                                                 | ------                                                                                      |
-| `"h_border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }` | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for header borders (`settings`)  |
-| `"border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`   | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for cell borders (`settings`)    |
-| `"border_color": { "l":1 }`                             | Sets lightness = 100% for applicable border (hue, saturation and alpha are unchanged)       |
-| `"border_color": { "s":0, "a":0.5 }`                    | Sets saturation = 0 and alpha = 50% for applicable border (hue and lightness are unchanged) |
+| Example                                                 | Result                                                                                                               |
+| -------                                                 | ------                                                                                                               |
+| `"h_border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }` | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for header borders (only applicable in`settings` section) |
+| `"border_color": { "h":20, "s":0.5, "l":0.2, "a":1 }`   | Sets hue = 20, sat = 50%, lightness = 20% and alpha = 100% for cell borders (if used in `settings` section)          |
+| `"border_color": { "l":1 }`                             | Sets lightness = 100% for applicable border (hue, saturation and alpha are unchanged)                                |
+| `"border_color": { "s":0, "a":0.5 }`                    | Sets saturation = 0 and alpha = 50% for applicable border (hue and lightness are unchanged)                          |
 
 #### border_color & h_border_color
 #### fill & h_fill
