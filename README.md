@@ -86,7 +86,7 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 #### width
     
-    Use this setting to change the width of the treemap.
+    Use this setting to change the width of the treemap if fixed_sidth is true.
     Valid values: a positive number
     
 | Example        | Result                                                       |
@@ -95,12 +95,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 #### show_headers
 
-    Use this setting to show or hide headers/branches in the treemap.
+    Use this setting to show or hide headers/branches and their text in the treemap.
     Valid values: true, false
  
 | Example                 | Result                                                                       |
 | -------                 | ------                                                                       |
-| `"show_headers": true`  | the treemap will include space for headers and show header text              |
+| `"show_headers": true`  | the treemap will include space for headers and will show header text         |
 | `"show_headers": false` | the treemap will not include space for headers and will not show header text |
 
 #### show_values
@@ -126,11 +126,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 #### text_size & h_text_size
 
-    Use this setting to change the font size used for text.
+    Use this setting to change the text size.
     In the `settings` section of a treemap
     - use `h_text_size` to set the text size for headers
     - use `text_size` to set the text size for cells
-    When updating this setting for individual headers or cells use `text_size` in both cases.
+    When updating this setting for individual headers or cells use `text_size` even for headers.
+    Valid values: a positive number
 
 | Example             | Result                                                                          |
 | -------             | ------                                                                          |
@@ -141,7 +142,31 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 ### Padding
 #### outer_padding
+
+    Use this setting to change the amount of padding around headers and cells.
+    Valid values: a positive number or zero
+
+| Example              | Result                                                       |
+| -------              | ------                                                       |
+| `"outer_padding": 8` | Set the padding around cells and headers to 8px              |
+| `"outer_padding": 0` | Set the padding around cells and headers to 0px (no padding) |
+
 #### text_padding & h_text_padding
+
+    Use this setting to change the padding around text within headers and cells.
+    In the `settings` section of a treemap
+    - use `h_text_padding` to set the text padding for headers
+    - use `text_padding` to set the text padding for cells
+    When updating this setting for individual headers or cells use `text_padding` even for headers.
+    Valid values: a positive number or zero
+
+| Example                | Result                                                                           |
+| -------                | ------                                                                           |
+| `"h_text_padding": 6`  | Set the text padding for headers to 6px (only applicable in `settings` section)  |
+| `"text_padding": 4`    | Set the text padding for cells to 4px (if used in `settings` section)            |
+| `"text_padding": 4`    | Set the text padding for a header to 4px (if used within a header node)          |
+| `"text_padding": 4`    | Set the text padding for a cell to 4px (if used within a cell node)              |
+
 
 ### Shading & Shadows
 #### shading & h_shading
