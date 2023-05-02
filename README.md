@@ -64,11 +64,15 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 ### Size & Shape
 #### aspect_ratio
-Use this setting to change the ratio of the width to the height for the treemap.
-- **Valid Values:** a string containing two positive numbers separated by a colon
-- `"aspect_ratio": "1:1"` the treemap will be square
-- `"aspect_ratio": "2:1"` the treemap will have a width twice as large as its height
-- `"aspect_ratio": "1:4"` the treemap will have a height four times as large as its width
+    
+    Use this setting to change the ratio of the width to the height for the treemap.
+    Valid values: a string containing two positive numbers separated by a colon.
+
+| Example                 | Result                                                          |
+| -------                 | ------                                                          |
+| `"aspect_ratio": "1:1"` | the treemap will be square                                      |
+| `"aspect_ratio": "2:1"` | the treemap will have a width twice as large as its height      |
+| `"aspect_ratio": "1:4"` | the treemap will have a height four times as large as its width |
 
 #### fixed_width
 Use this setting to determine if the treemap has a fixed or adaptive width.
