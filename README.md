@@ -65,16 +65,44 @@ The treemap below describes all of the available settings for the Enhanced Treem
 ### Size & Shape
 #### aspect_ratio
 Use this setting to change the ratio of the width to the height for the treemap.
-- `Valid Values:` two positive numbers separated by a colon, surrounded by quotes
-- `"aspect_ratio": "1:1"` creates a square treemap
-- `"aspect_ratio": "2:1"` creates a treemap with a width twice as large as its height
-- `"aspect_ratio": "1:4"` creates a treemap with a height four times as large as its width
+- **Valid Values:** a string containing two positive numbers separated by a colon
+- `"aspect_ratio": "1:1"` the treemap will be square
+- `"aspect_ratio": "2:1"` the treemap will have a width twice as large as its height
+- `"aspect_ratio": "1:4"` the treemap will have a height four times as large as its width
 
 #### fixed_width
+Use this setting to determine if the treemap has a fixed or adaptive width.
+- **Valid Values:** true, false
+- `"fixed_width": true` the treemap will have a fixed width
+- `"fixed_width": false` the treemap will fill the available width
+
 #### width
+Use this setting to change the width of the treemap.
+- **Valid Values:** a positive number
+- `"width": 500` the treemap will be 500 pixels wide if `fixed_width` is true
+
 #### show_headers
+Use this setting to show or hide headers/branches in the treemap.
+- **Valid Values:** true, false
+- `"show_headers": true` the treemap will include space for headers and show header text
+- `"show_headers": false` the treemap will not include space for headers and will not show header text
+
+**Put an Example Here**
+
 #### show_values
+Use this setting to show or hide values in the cells/leaves of the treemap.
+- **Valid Values:** true, false
+- `"show_values": true` the treemap will include values in the cells/leaves of the treemap
+- `"show_values": false` the treemap will not include values in the cells/leaves of the treemap
+
+**Put an Example Here**
+
 #### sort_by_value
+Use this setting to change how the treemap cells are sorted.
+- **Valid Values:** true, false
+- `"sort_by_value": true` the treemap cells will be sorted by value (largest values first)
+- `"sort_by_value": false` the treemap cells will remain in the order they appear in the code block
+
 #### text_size & h_text_size
 
 ### Padding
