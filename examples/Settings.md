@@ -1,4 +1,5 @@
-# Enhanced Treemap Settings
+# Enhanced Treemaps
+## Settings
 
 ```json
 {

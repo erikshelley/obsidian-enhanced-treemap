@@ -5,12 +5,23 @@ Treemaps are a useful way to visualize hierarchical data in a very compact form.
 Normally treemaps only show text for the leaves of the tree, however nested treemaps also show text for the branches.
 
 - [Simple Example](#simple-example)
+- [Complex Example](#complex-example)
 - [Settings](#settings)
+    - Size & Shape
+    - Padding
+    - Shading & Shadows
+    - Color
+    - Alignment
 
 ## Simple Example
 
-After installing and enabling the plugin, treemaps can be added to notes by creating JSON code blocks. 
-The root element of the JSON code block must contain an element "type": "enhancedtreemap".
+After installing and enabling the plugin, treemaps can be added to notes by creating JSON code blocks.
+The bare minimum requirements are:
+- The code block must have the type `json`
+- The code block must contain valid JSON
+- The root node must have this element: `"type": "enhancedtreemap"`
+- The root node must have at least one `"children"` array
+- The `"children"` array must have at least one child node
 
 <pre>
 ```json
@@ -30,11 +41,24 @@ The root element of the JSON code block must contain an element "type": "enhance
 
 ![Simple Example Image](./examples/SimpleExample.png)
 
+## Complex Example
+
+The examples below compare a simple treemap with an enhanced treemap to demonstrate some of the available features. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
+
+![Complex Example Image 1](./examples/ComplexExample1.png)
+![Complex Example Image 2](./examples/ComplexExample2.png)
+
 ## Settings
 
 The treemap below describes all of the available settings for the Enhanced Treemap plugin. Here is the [JSON code block](examples/Settings.md) used to create it.
 
 ![Settings Image](./examples/Settings.png)
+
+### Size & Shape
+### Padding
+### Shading & Shadows
+### Color
+### Alignment
 
 ## Releasing new releases
 
