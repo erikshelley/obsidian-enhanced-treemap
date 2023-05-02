@@ -47,7 +47,7 @@ The bare minimum requirements are:
 
 ### Complex Example
 
-The examples below compare a normal treemap with an enhanced treemap to demonstrate some of the available features. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
+The images below show how an enhanced treemap can be used to add context and style that is not available a standard treemap. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
 
 #### Normal Treemap
 ![Complex Example Image 1](./examples/ComplexExample1.png)
@@ -64,6 +64,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 ### Size & Shape
 #### aspect_ratio
+Use this setting to change the ratio of the width to the height for the treemap.
+- `Valid Values:` two positive numbers separated by a colon, surrounded by quotes
+- `"aspect_ratio": "1:1"` creates a square treemap
+- `"aspect_ratio": "2:1"` creates a treemap with a width twice as large as its height
+- `"aspect_ratio": "1:4"` creates a treemap with a height four times as large as its width
+
 #### fixed_width
 #### width
 #### show_headers
