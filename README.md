@@ -291,12 +291,12 @@ The treemap below describes all of the available settings for the Enhanced Treem
 ### Alignment Settings
 #### halign & h_halign
 
-    Use this setting to change the horizontal alignment of text within headers and cells.
-    In the `settings` section of a treemap
-        - use `h_halign` to set the text padding for headers
-        - use `halign` to set the text padding for cells
-    When updating this setting for individual headers or cells use `halign` even for headers.
-    Valid values: "left", "center" or "right"
+> Use this setting to change the horizontal alignment of text within headers and cells.
+> In the `settings` section of a treemap
+> - use `h_halign` to set the text padding for headers
+> - use `halign` to set the text padding for cells
+> When updating this setting for individual headers or cells use `halign` even for headers.
+> Valid values: "left", "center" or "right"
 
 | Example                | Result                                                                     |
 | -------                | ------                                                                     |
@@ -307,15 +307,14 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 #### valign
 
-    Use this setting to change the vertical alignment of text within cells.
-    There is no vertical alignment setting for headers.
-    Valid values: "top", "center" or "bottom"
+> Use this setting to change the vertical alignment of text within cells.
+> There is no vertical alignment setting for headers.
+> Valid values: "top", "center" or "bottom"
 
 | Example              | Result                                                               |
 | -------              | ------                                                               |
 | `"valign": "center"` | Centers text vertically in all cells (if used in `settings` section) |
 | `"valign": "bottom"` | Moves text to the bottom of a cell (if used within a cell node)      |
-
 
 
 ## Releasing new releases
