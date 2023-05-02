@@ -308,9 +308,13 @@ The treemap below describes all of the available settings for the Enhanced Treem
 
 #### valign
 
-> Use this setting to change the vertical alignment of text within cells.
-> There is no vertical alignment setting for headers.
+> Use this setting to change the vertical alignment of text within cells. There is no vertical alignment setting for headers.
 > - Valid values: "top", "center" or "bottom"
+> - Examples
+>     - `"valign": "center"` 
+>         - Centers text vertically in all cells (if used in `settings` section)
+>     - `"valign": "bottom"`
+>         - Moves text to the bottom of a cell (if used within a cell node)
 
 | Example              | Result                                                               |
 | -------              | ------                                                               |
