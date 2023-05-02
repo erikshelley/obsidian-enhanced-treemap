@@ -6,7 +6,7 @@ export interface EnhancedTreemapSettings {
 
     // Treemap Settings
     aspect_ratio:   float;
-    cell_padding:   float;
+    outer_padding:  float;
     fixed_width:    bool;
     h_shadow_size:  float;
     h_text_padding: float;
@@ -45,7 +45,7 @@ export const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
 
     // Treemap Settings
     aspect_ratio:   1,
-    cell_padding:   8,
+    outer_padding:  8,
     fixed_width:    true,
     h_shadow_size:  4,
     h_text_padding: 8,
@@ -372,10 +372,10 @@ export class SettingTab extends PluginSettingTab {
             .setName('Cell Padding')
             .setDesc('Default Padding Size Around Cells')
             .addText(text => text
-                .setValue(this.plugin.settings.cell_padding.toString())
+                .setValue(this.plugin.settings.outer_padding.toString())
                 .onChange(async (value) => {
                     if (value > 0) {
-                        this.plugin.settings.cell_padding = value;
+                        this.plugin.settings.outer_padding = value;
                         await this.plugin.saveSettings();
                     }
                 }));

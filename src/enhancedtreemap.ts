@@ -39,7 +39,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     aspect_ratio:         float;
     aspect_w:             float;
     aspect_h:             float;
-    cell_padding:         float;
+    outer_padding:        float;
     fixed_width:          bool;
     h_shadow_size:        float;
     h_text_padding:       float;
@@ -83,7 +83,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         this.aspect_ratio         = settings.aspect_ratio;
         this.aspect_w             = settings.aspect_w;
         this.aspect_h             = settings.aspect_h;
-        this.cell_padding         = settings.cell_padding;
+        this.outer_padding        = settings.outer_padding;
         this.fixed_width          = settings.fixed_width;
         this.h_shadow_size        = settings.h_shadow_size;
         this.h_text_padding       = settings.h_text_padding;
@@ -169,8 +169,8 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     this.aspect_w = ratio[0];
                     this.aspect_h = ratio[1];
                 }
-                if (setting.cell_padding != null) 
-                    this.cell_padding = this.verifyOption(setting.cell_padding, "cell_padding", "float", 0, null, null);
+                if (setting.outer_padding != null) 
+                    this.outer_padding = this.verifyOption(setting.outer_padding, "outer_padding", "float", 0, null, null);
                 if (setting.fixed_width != null) 
                     this.fixed_width = setting.fixed_width;
                 if (setting.h_shadow_size != null) 
@@ -381,19 +381,19 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
         var svg = d3.select(this.svg).append("g");
 
-        var cell_padding = this.cell_padding * scale;
-        var text_padding = this.text_padding * scale;
+        var outer_padding  = this.outer_padding * scale;
+        var text_padding   = this.text_padding * scale;
         var h_text_padding = this.h_text_padding * scale;
-        var text_size = this.text_size * scale;
-        var h_text_size = this.h_text_size * scale;
+        var text_size      = this.text_size * scale;
+        var h_text_size    = this.h_text_size * scale;
 
         // add positions to the nodes using the treemap layout
         var treemapLayout = d3.treemap()
             .tile(d3.treemapSquarify.ratio(1))
             .size([width, height])
-            .paddingOuter(cell_padding)
-            .paddingTop(this.show_headers ? h_text_size + 2 * h_text_padding : cell_padding)
-            .paddingInner(cell_padding)
+            .paddingOuter(outer_padding)
+            .paddingTop(this.show_headers ? h_text_size + 2 * h_text_padding : outer_padding)
+            .paddingInner(outer_padding)
             (nodes);
 
         // decendants instead of leaves shows all nodes, not just the leaves
