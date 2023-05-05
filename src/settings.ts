@@ -71,7 +71,7 @@ export const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
     halign:         "left",
     shading:        true,
     shadow:         true,
-    text_color:     [0, 0, 0.9, 1],
+    text_color:     [0, 0, 0.8, 1],
     text_padding:   8,
     text_size:      13,
     valign:         "top"

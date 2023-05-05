@@ -118,25 +118,25 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     }
 
     async onload() {
-        try {
-            var code = this.element.querySelector("code");
-            if (code != null) {
-                var text = code.textContent;
-                if (text != null) {
+        var code = this.element.querySelector("code");
+        if (code != null) {
+            var text: string = code.textContent;
+            if (text != null) {
+                try {
                     this.data = JSON.parse(text);
-                    this.parseSettings();
-                    if (!this.error) {
-                        var parentDiv = this.element.querySelector("pre");
-                        var svg = this.emptySVG();
-                        if (parentDiv != null && svg != null) {
-                            parentDiv.replaceWith(svg);
-                            this.svg = this.element.querySelector("svg");
-                        }
+                } catch(e) {
+                    this.handleError(e);
+                }
+                this.parseSettings();
+                if (!this.error) {
+                    var parentDiv = this.element.querySelector("pre");
+                    var svg = this.emptySVG();
+                    if (parentDiv != null && svg != null) {
+                        parentDiv.replaceWith(svg);
+                        this.svg = this.element.querySelector("svg");
                     }
                 }
             }
-        } catch(e) {
-            this.handleError(e);
         }
     }
 
