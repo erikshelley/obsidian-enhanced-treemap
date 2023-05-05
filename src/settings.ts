@@ -1,4 +1,4 @@
-import { App, normalizePath, PluginSettingTab, Setting } from 'obsidian';
+import { App, FileSystemAdapter, normalizePath, PluginSettingTab, Setting } from 'obsidian';
 import EnhancedTreemapPlugin from './main';
 
 export interface EnhancedTreemapSettings {
@@ -85,7 +85,8 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
     constructor(app: App, plugin: EnhancedTreemapPlugin) {
         super(app, plugin);
         this.plugin = plugin;
-        this.plugin.settings.basePath = normalizePath(app.vault.adapter.basePath);
+        var adapter = app.vault.adapter as FileSystemAdapter;
+        this.plugin.settings.basePath = normalizePath(adapter.getBasePath());
     }
 
     getHSLA(setting: Array<number>): string {

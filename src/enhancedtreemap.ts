@@ -122,10 +122,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     async onload() {
         var code = this.element.querySelector("code");
         if (code != null) {
-            var text: string = code.textContent;
-            if (text != null) {
+            if (code.textContent != null) {
                 try {
-                    this.data = JSON.parse(text);
+                    this.data = JSON.parse(code.textContent);
                 } catch(e) {
                     this.handleError(e);
                 }
