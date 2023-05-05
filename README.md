@@ -7,6 +7,7 @@ Normally treemaps only show text for the leaves of the tree, however nested tree
 - [Installation](#installation)
 - [Examples](#examples)
     - [Simple Example](#simple-example)
+    - [Image Example](#image-example)
     - [Complex Example](#complex-example)
 - [Settings](#settings)
     - [Size & Shape](#size--shape)
@@ -30,10 +31,10 @@ Normally treemaps only show text for the leaves of the tree, however nested tree
 ### Simple Example
 
 After installing and enabling the plugin, treemaps can be added to notes by creating JSON code blocks.
-The minimum requirements are:
+These minimum requirements must be met:
 - The code block must have the type `json`
 - The code block must contain valid JSON
-- The root node must have this element: `"type": "enhancedtreemap"`
+- The root node must have the element: `"type": "enhancedtreemap"`
 - The root node must have at least one `"children"` array
 - The `"children"` array must have at least one child node
 
@@ -54,6 +55,32 @@ The minimum requirements are:
 </pre>
 
 ![Simple Example Image](./examples/SimpleExample.png)
+
+### Image Example
+
+Images can be included in enhanced treemaps. Use the `"image"` attribute and provide the URL as the value if the image is online or provide the path if the image is in your vault.
+If the `"name"` attribute is used, the text will appear over the image.
+
+<pre>
+```json
+{
+    "type": "enhancedtreemap",
+    "name": "Image Example",
+    "settings": [
+        { "aspect_ratio": "2:1" },
+        { "h_shading": false },
+        { "shading": false },
+        { "halign": "center" }
+    ],
+    "children": [
+		{ "name": "Image on Wikipedia", "image": "https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" },
+		{ "name": "Image in Root Folder of Vault", "image": "/Moon.jpg" }
+    ]
+}
+```
+</pre>
+
+![Image Example](./examples/ImageExample.png)
 
 ### Complex Example
 

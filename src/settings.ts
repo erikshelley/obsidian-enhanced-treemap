@@ -1,7 +1,8 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, normalizePath, PluginSettingTab, Setting } from 'obsidian';
 import EnhancedTreemapPlugin from './main';
 
 export interface EnhancedTreemapSettings {
+    basePath:       string;
     aspect_w:       number;
     aspect_h:       number;
 
@@ -40,12 +41,12 @@ export interface EnhancedTreemapSettings {
 }
 
 export const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
-    // Size & Shape Settings
-    aspect_w:       1,
-    aspect_h:       1,
+    basePath:       "",
 
     // Treemap Settings
     aspect_ratio:   1,
+    aspect_w:       1,
+    aspect_h:       1,
     outer_padding:  8,
     fixed_width:    true,
     h_shadow_size:  4,
@@ -84,6 +85,7 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
     constructor(app: App, plugin: EnhancedTreemapPlugin) {
         super(app, plugin);
         this.plugin = plugin;
+        this.plugin.settings.basePath = normalizePath(app.vault.adapter.basePath);
     }
 
     getHSLA(setting: Array<number>): string {

@@ -13,7 +13,7 @@ export default class EnhancedTreemap {
     async renderEnhancedTreemap(element: HTMLElement, ctx: MarkdownPostProcessorContext) {
         var renderer: EnhancedTreemapRenderChild;
 
-        // need this "await" on adding the svg to the DOM before adding the text otherwise getComputedTextLenght does not work
+        // need this "await" on adding the svg to the DOM before adding the text otherwise getComputedTextLength does not work
         await this.plugin.app.workspace.onLayoutReady(() => {
             renderer = new EnhancedTreemapRenderChild(element, this, ctx, this.plugin.settings);
             ctx.addChild(renderer);
@@ -26,6 +26,7 @@ export default class EnhancedTreemap {
 }
 
 class EnhancedTreemapRenderChild extends MarkdownRenderChild {
+    basePath:             string;
     ctx:                  MarkdownPostProcessorContext;
     data:                 any;
     uuid:                 number;
@@ -73,6 +74,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
     constructor(element: HTMLElement, enhancedtreemap: EnhancedTreemap, ctx: MarkdownPostProcessorContext, settings: EnhancedTreemapSettings) {
         super(element);
+        this.basePath             = settings.basePath;
         this.ctx                  = ctx;
         this.element              = element;
         this.enhancedtreemap      = enhancedtreemap;
@@ -412,7 +414,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             (nodes);
 
         // decendants instead of leaves shows all nodes, not just the leaves
-        svg.selectAll("rect").data(nodes.descendants()).enter()
+        svg.selectAll().data(nodes.descendants()).enter()
             .append("rect")
                 .attr("x",      (d: any) => { return d.x0; })
                 .attr("y",      (d: any) => { return d.y0; })
@@ -477,7 +479,19 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     }
                 });
 
-        svg.selectAll("highlight").data(nodes.descendants()).enter()
+        // Images
+        svg.selectAll().data(nodes.descendants().filter((d: any) => { return d.data.image; })).enter()
+            .append("image")
+                .attr("x",          (d: any) => { return d.x0; })
+                .attr("y",          (d: any) => { return d.y0; })
+                .attr("width",      (d: any) => { return d.x1 - d.x0; })
+                .attr("height",     (d: any) => { return d.y1 - d.y0; })
+                .attr("xlink:href", (d: any) => { 
+                    if (d.data.image.includes("://")) return d.data.image;
+                    else return "app://local/" + this.basePath + d.data.image; } );
+
+        // Shading rectangles
+        svg.selectAll().data(nodes.descendants()).enter()
             .append("rect")
                 .attr("x",      (d: any) => { return d.x0; })
                 .attr("y",      (d: any) => { return d.y0; })
@@ -503,7 +517,8 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 })
                 .append("title").text((d: any) => { return d.data.name; });
 
-        svg.selectAll("text").data(nodes.leaves()).enter()
+        // Cell text
+        svg.selectAll().data(nodes.leaves()).enter()
             .append("text")
                 .attr("x",           (d: any) => { 
                         if (d.data.halign == "left"   || (d.data.halign == null && this.halign == "left"))   return d.x0 + textPadding(d, scale, text_padding); 
@@ -541,10 +556,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .call(wrap)
                 .append("title").text((d: any) => { return d.data.name; });
 
-        // label instead of text otherwise it doesn't work
-        // use the filter at the end otherwise the previous one doesn't work
+        // Header text
         if (this.show_headers) {
-            svg.selectAll("label").data(nodes.descendants().filter((d: any) => { return d.children; })).enter()
+            svg.selectAll().data(nodes.descendants().filter((d: any) => { return d.children; })).enter()
                 .append("text")
                     .attr("x",           (d: any) => { 
                             if (d.data.halign == "left"   || (d.data.halign == null && this.h_halign == "left"))   return d.x0 + 1.0 * h_text_padding; 
