@@ -38,18 +38,16 @@ export default class EnhancedTreemapPlugin extends Plugin {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()); 
     }
 
+    //private debouncedRefresh: () => void = () => null;
+
     async saveSettings() { 
         await this.saveData(this.settings); 
-        // Not sure how to get the treemaps to refresh after settings are updated
-        // rebuildView works with "npm run dev" but does not work with "npm run build"
-
-        //this.app.workspace.updateOptions();
-        //const view = app.workspace.getActiveViewOfType(MarkdownView);
-        //const editor = view.editor;
-        //editor.refresh();
-        //if (view) {
-        //    if (view.leaf) view.leaf.rebuildView();
-        //}
+        this.app.workspace.trigger("enhancedtreemap:refresh");
+        /*this.debouncedRefresh = debounce(
+            () => this.app.workspace.trigger("enhancedtreemap:refresh"),
+			500,
+			true
+		);*/
     }
 }
 
