@@ -9,6 +9,7 @@ Normally treemaps only show text for the leaves of the tree, however nested tree
     - [Simple Example](#simple-example)
     - [Image Example](#image-example)
     - [Complex Example](#complex-example)
+- [Save as PNG](#save-as-png)
 - [Settings](#settings)
     - [Size & Shape](#size--shape)
     - [Padding](#padding)
@@ -84,7 +85,7 @@ If the `"name"` attribute is used, the text will appear over the image.
 
 ### Complex Example
 
-The images below show how an enhanced treemap can be used to add context and style that is not available in a standard treemap. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
+The example below show how an enhanced treemap can be used to add context and style that is not available in a standard treemap. Here is the [JSON code block](examples/ComplexExample.md) used to create the enhanced treemap.
 
 #### Normal Treemap
 ![Complex Example Image 1](./examples/ComplexExample1.png)
@@ -92,6 +93,10 @@ The images below show how an enhanced treemap can be used to add context and sty
 #### Enhanced Treemap
 ![Complex Example Image 2](./examples/ComplexExample2.png)
 
+
+## Save as PNG
+
+If the **Save as PNG** option is enabled in the plugin settings, a button will appear above each treemap to let you save it as a PNG.
 
 ## Settings
 

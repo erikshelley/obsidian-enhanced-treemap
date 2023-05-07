@@ -3,6 +3,7 @@ import EnhancedTreemapPlugin from './main';
 
 export interface EnhancedTreemapSettings {
     basePath:       string;
+    save_as_png:    boolean;
     aspect_w:       number;
     aspect_h:       number;
 
@@ -42,6 +43,7 @@ export interface EnhancedTreemapSettings {
 
 export const DEFAULT_SETTINGS: EnhancedTreemapSettings = {
     basePath:       "",
+    save_as_png:    true,
 
     // Treemap Settings
     aspect_ratio:   1,
@@ -111,6 +113,18 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
         containerEl.empty();
 
         containerEl.createEl('h1', { text: 'Enhanced Treemap Settings' } );
+        containerEl.createEl('h2', { text: 'Save as PNG' } );
+
+        new Setting(containerEl)
+            .setName("Show Save as PNG Button")
+            .setDesc("Show Save as PNG Button Above Each Treemap")
+            .addToggle((t) => {
+                t.setValue(this.plugin.settings.save_as_png).onChange(async (v) => {
+                    this.plugin.settings.save_as_png = v;
+                    await this.plugin.saveSettings();
+                });
+            });
+
         containerEl.createEl('h2', { text: 'Size & Shape' } );
 
         new Setting(containerEl)

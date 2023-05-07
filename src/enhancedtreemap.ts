@@ -1,7 +1,8 @@
-import { MarkdownPostProcessorContext, MarkdownRenderChild } from 'obsidian';
+import { ButtonComponent, MarkdownPostProcessorContext, MarkdownRenderChild, setIcon } from 'obsidian';
 import EnhancedTreemapPlugin from './main';
 import { EnhancedTreemapSettings } from './settings';
 import * as d3 from 'd3';
+const d3ToPng = require('d3-svg-to-png');
 
 // extend workspace with refresh event
 declare module "obsidian" {
@@ -33,6 +34,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     ctx:                  MarkdownPostProcessorContext;
     data:                 any;
     uuid:                 number;
+    previous_uuid:        number;
     element:              HTMLElement;
     enhancedtreemap:      EnhancedTreemap;
     error:                boolean;
@@ -100,13 +102,17 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             var parentDiv = this.element.querySelector("pre");
             if (parentDiv != null) {
                 parentDiv.replaceWith(svg);
-                this.svg = this.element.querySelector("svg");
+                this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
             }
             else {
-                var svgEl = this.element.querySelector("svg");
+                var buttonEl = this.element.querySelector(".save_as_png_button");
+                if (buttonEl != null) {
+                    buttonEl.remove();
+                }
+                var svgEl = this.element.querySelector("#enhancedtreemap_" + this.previous_uuid);
                 if (svgEl != null) {
                     svgEl.replaceWith(svg);
-                    this.svg = this.element.querySelector("svg");
+                    this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
                 }
             }
         }
@@ -264,11 +270,24 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     }
 
     emptySVG() {
+        this.previous_uuid = this.uuid;
+        this.uuid = Math.floor(Math.random() * 100000);
         const wrapper = document.createElement("div");
         wrapper.classList.add("block-language-json");
 
+        if (this.settings.save_as_png) {
+            let saveButton = new ButtonComponent(wrapper)
+                .setButtonText("Save as PNG")
+                //.setIcon("save") // https://lucide.dev/
+                .setClass("save_as_png_button")
+                .onClick(() => { 
+                    d3ToPng("#enhancedtreemap_" + this.uuid, "filename", { scale: 2 });
+                });
+            const newline = document.createElement("br");
+            wrapper.append(newline);
+        }
+
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        this.uuid = Math.floor(Math.random() * 100000);
         var svg_id = "enhancedtreemap_" + this.uuid;
         this.svg_id = svg_id;
         svg.setAttribute("id", svg_id);
@@ -329,11 +348,13 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         svg.append(filter);
 
         wrapper.append(svg);
+
         return wrapper;
     }
 
     async renderEnhancedTreemap() {
         if (this.error) return;
+
         var svg_element = document.getElementById(this.svg_id);
 
         // would be nice to have a better solution here, sometimes this function is called before the svg is in the DOM
@@ -451,7 +472,32 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     }
                 });
 
+
         // Images
+        var toDataURL = function(url: string, callback: any) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    callback(reader.result);
+                }
+                reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
+        };
+
+        function base64Image(image: any) {
+            image.each(function() {
+                var img = d3.select(this);
+                var url = img.attr("href");
+                toDataURL(url, (imageData: any) => {
+                    img.attr("href", imageData);
+                });
+            });
+        }
+
         svg.selectAll().data(nodes.descendants().filter((d: any) => { return d.data.image; })).enter()
             .append("image")
                 .attr("x",          (d: any) => { return d.x0; })
@@ -460,7 +506,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .attr("height",     (d: any) => { return d.y1 - d.y0; })
                 .attr("xlink:href", (d: any) => {
                     if (d.data.image.includes("://")) return d.data.image;
-                    else return "app://local/" + this.settings.basePath + d.data.image; } );
+                    else return "app://local/" + this.settings.basePath + d.data.image; })
+                .call(base64Image);
+
 
         // Shading rectangles
         svg.selectAll().data(nodes.descendants()).enter()
