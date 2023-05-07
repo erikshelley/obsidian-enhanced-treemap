@@ -723,6 +723,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 }
                 if (overflow == true) {
                     tspan.text(tspan.text() + "...");
+                    while (checkWidth(tspan, width) && tspan.text().length > 3) {
+                        tspan.text(tspan.text().substring(0, tspan.text().length - 4) + "...");
+                    }
                 }
                 if (lineNumber > 0) {
                     var startDy: number;
