@@ -1,6 +1,6 @@
 {
-	"name": "obsidian-enhanced-treemap",
-	"version": "1.3.3",
+	"name": "enhanced-treemap",
+	"version": "1.3.4",
 	"description": "This is an Obsidian (https://obsidian.md) plugin for creating enhanced treemaps",
 	"main": "main.js",
 	"scripts": {
