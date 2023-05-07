@@ -91,10 +91,12 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
         this.plugin.settings.basePath = normalizePath(adapter.getBasePath());
     }
 
+    // combine hue, saturation, lightness and alpha elements of an array into a string
     getHSLA(setting: Array<number>): string {
         return setting[0] + ", " + setting[1] + ", " + setting[2] + ", " + setting[3];
     }
 
+    // set hue, saturation, lightness and alpha elements of an array from an input string
     setHSLA(value: string, setting: Array<number>): void {
         var values = value.split(", ");
         var h: number = parseFloat(values[0]);
@@ -107,6 +109,7 @@ export class EnhancedTreemapSettingTab extends PluginSettingTab {
         if (a >= 0 && a <= 1) setting[3] = a;
     }
 
+    // display the plugin settings
     display(): void {
         const { containerEl } = this;
 

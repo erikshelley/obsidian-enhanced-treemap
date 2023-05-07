@@ -4,12 +4,14 @@ import { EnhancedTreemapSettings } from './settings';
 import * as d3 from 'd3';
 const d3ToPng = require('d3-svg-to-png');
 
-// extend workspace with refresh event
+
+// extend obsidian workspace object with enhancedtreemap:refresh event
 declare module "obsidian" {
-	interface Workspace {
-		on(name: "enhancedtreemap:refresh", callback: () => void, ctx?: any): EventRef;
-	}
+    interface Workspace {
+        on(name: "enhancedtreemap:refresh", callback: () => void, ctx?: any): EventRef;
+    }
 }
+
 
 export default class EnhancedTreemap {
     plugin: EnhancedTreemapPlugin;
@@ -21,13 +23,13 @@ export default class EnhancedTreemap {
     async renderEnhancedTreemap(element: HTMLElement, ctx: MarkdownPostProcessorContext) {
         var renderer: EnhancedTreemapRenderChild;
 
-        // need this "await" on adding the svg to the DOM before adding the text otherwise getComputedTextLength does not work
         await this.plugin.app.workspace.onLayoutReady(() => {
             renderer = new EnhancedTreemapRenderChild(element, this, ctx, this.plugin.settings);
             ctx.addChild(renderer);
         });
     }
 }
+
 
 class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     basePath:             string;
@@ -57,30 +59,35 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         this.pluginsettings       = settings;
     }
 
+    refresh = () => { this.render(); };
+
     async onload() {
-        this.registerEvent(
-            this.enhancedtreemap.plugin.app.workspace.on(
-                "enhancedtreemap:refresh",
-                this.refresh));
+        this.registerEvent(this.enhancedtreemap.plugin.app.workspace.on("enhancedtreemap:refresh", this.refresh));
         this.render();
     }
 
-    refresh = () => { this.render(); };
-
-    loadSettings() {
-        this.settings = JSON.parse(JSON.stringify(this.pluginsettings));
-    }
-
     async render() {
-        this.loadSettings();
+        this.loadSettings();  // load settings every time a treemap is rendered in case they were updated
         this.verifyJSON();
-        this.parseSettings();
+        this.parseSettings(); // parse the treemap settings to override the plugin settings
         this.addEmptySVG();
-        await this.enhancedtreemap.plugin.app.workspace.onLayoutReady(() => {
-            this.renderEnhancedTreemap();
-        });
+        await this.enhancedtreemap.plugin.app.workspace.onLayoutReady(() => { this.renderEnhancedTreemap(); });
     }
 
+    // make a deep copy of the plugin settings so if they are changed for a treemap they are not changed for the plugin
+    loadSettings() { this.settings = JSON.parse(JSON.stringify(this.pluginsettings)); }
+
+    // show an error message instead of an SVG in place of the code block
+    handleError(message: string) {
+        this.error = true;
+        const wrapper = document.createElement("div");
+        wrapper.textContent = message;
+        wrapper.setAttribute("style", "color: red");
+        var parentDiv = this.element.querySelector("pre");
+        if (parentDiv != null) parentDiv.replaceWith(wrapper);
+    }
+
+    // make sure the JSON can be parsed
     verifyJSON() {
         var code = this.element.querySelector("code");
         if (code != null) {
@@ -95,37 +102,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         }
     }
 
-    addEmptySVG() {
-        if (this.error) return;
-        var svg = this.emptySVG();
-        if (svg != null) {
-            var parentDiv = this.element.querySelector("pre");
-            if (parentDiv != null) {
-                parentDiv.replaceWith(svg);
-                this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
-            }
-            else {
-                var svgEl = this.element.querySelector("#enhancedtreemap_" + this.previous_uuid);
-                if (svgEl != null) {
-                    var parentDivRefresh = svgEl.parentElement;
-                    if (parentDivRefresh != null) {
-                        parentDivRefresh.replaceWith(svg);
-                        this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
-                    }
-                }
-            }
-        }
-    }
-
-    handleError(message: string) {
-        this.error = true;
-        const wrapper = document.createElement("div");
-        wrapper.textContent = message;
-        wrapper.setAttribute("style", "color: red");
-        var parentDiv = this.element.querySelector("pre");
-        if (parentDiv != null) parentDiv.replaceWith(wrapper);
-    }
-
+    // raise an error if a number setting is invalid
     verifyNumber(value: number, setting: string, low: number, high: number) {
         if (Number.isNaN(value)) this.handleError(setting + " must be a number!");
         if (low != null && value < low) this.handleError(setting + " must be >= " + low);
@@ -133,16 +110,19 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         return value;
     }
 
+    // raise an error if a boolean setting is invalid
     verifyBoolean(value: boolean, setting: string) {
         if (typeof value != "boolean") this.handleError(setting + " must be true or false (no quotes)!");
         return value;
     }
 
+    // raise an error if a string setting is invalid
     verifyString(value: string, setting: string, value_list: Array<string>) {
         if (!value_list.includes(value)) this.handleError(setting + "must be in this list: " + value_list);
         return value;
     }
 
+    // update settings from plugin defaults with settings from treemap code block
     parseSettings() {
         if (this.data == null) return;
         if (this.error) return;
@@ -268,17 +248,39 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         }
     }
 
+    // define an empty SVG element ready for the treemap to be added
     emptySVG() {
         this.previous_uuid = this.uuid;
         this.uuid = Math.floor(Math.random() * 100000);
+        this.svg_id = "enhancedtreemap_" + this.uuid;
+
         const wrapper = document.createElement("div");
         wrapper.classList.add("block-language-json");
+
+        /*
+        <button>Save as PNG</button>
+        <br>
+        <svg id="enhancedtreemap_xxxx" width="800" height="400" name="enhancedtreemap" class="enhancedtreemap">
+            <defs>
+                <radialGradient id="radialgradient_6828" cx="25%" cy="25%" r="100%">
+                    <stop offset="0%" stop-color="hsla(0, 0%, 100%, 10%)"></stop>
+                    <stop offset="100%" stop-color="hsla(0, 0%, 0%, 10%)"></stop>
+                </radialGradient>
+            </defs>
+            <filter id="h_shadow_xxxx" color-interpolation-filters="sRGB">
+                <feDropShadow dx="4" dy="4" stdDeviation="4" flood-opacity="0.5"></feDropShadow>
+            </filter>
+            <filter id="shadow_xxxx" color-interpolation-filters="sRGB">
+                <feDropShadow dx="4" dy="4" stdDeviation="4" flood-opacity="0.5"></feDropShadow>
+            </filter>
+        </svg>
+        */
 
         if (this.settings.save_as_png) {
             let saveButton = new ButtonComponent(wrapper)
                 .setButtonText("Save as PNG")
                 //.setIcon("save") // https://lucide.dev/
-                .onClick(() => { 
+                .onClick(() => {
                     d3ToPng("#enhancedtreemap_" + this.uuid, "filename", { scale: 2 });
                 });
             const newline = document.createElement("br");
@@ -286,9 +288,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         }
 
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        var svg_id = "enhancedtreemap_" + this.uuid;
-        this.svg_id = svg_id;
-        svg.setAttribute("id", svg_id);
+        svg.setAttribute("id", this.svg_id);
 
         if (this.settings.fixed_width == false) {
             svg.setAttribute("width", "100%");
@@ -350,14 +350,39 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         return wrapper;
     }
 
+    // add the empty SVG in place of the code block
+    addEmptySVG() {
+        if (this.error) return;
+        var svg = this.emptySVG();
+        if (svg != null) {
+            var parentDiv = this.element.querySelector("pre");
+            if (parentDiv != null) {
+                parentDiv.replaceWith(svg);
+                this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
+            }
+            else { // if a refresh happens while in reader view there is no pre element, only our substituted elements
+                var svgEl = this.element.querySelector("#enhancedtreemap_" + this.previous_uuid);
+                if (svgEl != null) {
+                    var parentDivRefresh = svgEl.parentElement;
+                    if (parentDivRefresh != null) {
+                        parentDivRefresh.replaceWith(svg);
+                        this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
+                    }
+                }
+            }
+        }
+    }
+
+    // use d3.js functions to create the treemap
     async renderEnhancedTreemap() {
         if (this.error) return;
 
         var svg_element = document.getElementById(this.svg_id);
 
-        // would be nice to have a better solution here, sometimes this function is called before the svg is in the DOM
+        // TODO: find a better solution for this - it loops forever waiting
+        // some elements are not added to the DOM until they are visible (eg. scroll down to them)
         while (svg_element == null) {
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 500));
             svg_element = document.getElementById(this.svg_id);
         }
 
@@ -365,6 +390,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         var height = this.svg_height;
         var scale = 1;
 
+        // resize SVG to 100% width if it is not fixed width
         if (!this.settings.fixed_width) {
             scale = this.settings.aspect_ratio;
             if (svg_element.parentElement != null) {
@@ -377,8 +403,14 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             svg_element.setAttribute("height", (height / scale).toString());
         }
 
-        var vertical_alignment = this.settings.valign; // this is needed to access them within wrap function
+        var vertical_alignment   = this.settings.valign; // this is needed to access them within wrap function
         var horizontal_alignment = this.settings.halign; // this is needed to access them within wrap function
+        var outer_padding        = this.settings.outer_padding * scale;
+        var text_padding         = this.settings.text_padding * scale;
+        var h_text_padding       = this.settings.h_text_padding * scale;
+        var text_size            = this.settings.text_size * scale;
+        var h_text_size          = this.settings.h_text_size * scale;
+
 
         // load json data into hierarchy of nodes
         // the ||!d.children adds a default value of 1 for any leaf nodes with no value
@@ -390,14 +422,6 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             nodes = d3.hierarchy(this.data).sum((d: any) => { return d.value||!d.children; });
         }
 
-        var svg = d3.select(this.svg).append("g");
-
-        var outer_padding  = this.settings.outer_padding * scale;
-        var text_padding   = this.settings.text_padding * scale;
-        var h_text_padding = this.settings.h_text_padding * scale;
-        var text_size      = this.settings.text_size * scale;
-        var h_text_size    = this.settings.h_text_size * scale;
-
         // add positions to the nodes using the treemap layout
         var treemapLayout = d3.treemap()
             .tile(d3.treemapSquarify.ratio(1))
@@ -407,70 +431,28 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             .paddingInner(outer_padding)
             (nodes);
 
-        // decendants instead of leaves shows all nodes, not just the leaves
+        // add group to the SVG to hold the treemap elements
+        var svg = d3.select(this.svg).append("g");
+
+        // Cell rectangles
+        // use decendants instead of leaves to show all nodes, not just the leaves
         svg.selectAll().data(nodes.descendants()).enter()
             .append("rect")
                 .attr("x",      (d: any) => { return d.x0; })
                 .attr("y",      (d: any) => { return d.y0; })
                 .attr("width",  (d: any) => { return d.x1 - d.x0; })
                 .attr("height", (d: any) => { return d.y1 - d.y0; })
-                .attr("stroke", (d: any) => {
-                    if (d.children) {
-                        if (d.data.border_color == null) {
-                            return d3.hsl(this.settings.h_border_color[0], this.settings.h_border_color[1], this.settings.h_border_color[2], this.settings.h_border_color[3]).toString();
-                        }
-                        else {
-                            return d3.hsl(
-                                d.data.border_color.h == null ? this.settings.h_border_color[0] : d.data.border_color.h,
-                                d.data.border_color.s == null ? this.settings.h_border_color[1] : d.data.border_color.s,
-                                d.data.border_color.l == null ? this.settings.h_border_color[2] : d.data.border_color.l,
-                                d.data.border_color.a == null ? this.settings.h_border_color[3] : d.data.border_color.a).toString();
-                        }
-                    }
-                    else {
-                        if (d.data.border_color == null) {
-                            return d3.hsl(this.settings.border_color[0], this.settings.border_color[1], this.settings.border_color[2], this.settings.border_color[3]).toString();
-                        }
-                        else {
-                            return d3.hsl(
-                                d.data.border_color.h == null ? this.settings.border_color[0] : d.data.border_color.h,
-                                d.data.border_color.s == null ? this.settings.border_color[1] : d.data.border_color.s,
-                                d.data.border_color.l == null ? this.settings.border_color[2] : d.data.border_color.l,
-                                d.data.border_color.a == null ? this.settings.border_color[3] : d.data.border_color.a).toString();
-                        }
-                    }
+                .attr("stroke", (d: any) => { return d.children ?
+                      getDataOrSetting(d.data.border_color, this.settings.h_border_color) :
+                      getDataOrSetting(d.data.border_color, this.settings.border_color)
                 })
-                .attr("fill",   (d: any) => {
-                    if (d.children) {
-                        if (d.data.fill == null) { return d3.hsl(this.settings.h_fill[0], this.settings.h_fill[1], this.settings.h_fill[2], this.settings.h_fill[3]).toString(); }
-                        else {
-                            return d3.hsl(
-                                d.data.fill.h == null ? this.settings.h_fill[0] : d.data.fill.h,
-                                d.data.fill.s == null ? this.settings.h_fill[1] : d.data.fill.s,
-                                d.data.fill.l == null ? this.settings.h_fill[2] : d.data.fill.l,
-                                d.data.fill.a == null ? this.settings.h_fill[3] : d.data.fill.a).toString();
-                        }
-                    }
-                    else {
-                        if (d.data.fill == null) { return d3.hsl(this.settings.fill[0], this.settings.fill[1], this.settings.fill[2], this.settings.fill[3]).toString(); }
-                        else {
-                            return d3.hsl(
-                                d.data.fill.h == null ? this.settings.fill[0] : d.data.fill.h,
-                                d.data.fill.s == null ? this.settings.fill[1] : d.data.fill.s,
-                                d.data.fill.l == null ? this.settings.fill[2] : d.data.fill.l,
-                                d.data.fill.a == null ? this.settings.fill[3] : d.data.fill.a).toString();
-                        }
-                    }
+                .attr("fill", (d: any) => { return d.children ?
+                      getDataOrSetting(d.data.fill, this.settings.h_fill) :
+                      getDataOrSetting(d.data.fill, this.settings.fill)
                 })
-                .attr("filter", (d: any) => {
-                    if (d.children) {
-                        if (d.data.shadow == null) { if (this.settings.h_shadow) { return "url(#h_shadow_" + this.uuid + ")"; } else return ""; }
-                        else { if (d.data.shadow) { return "url(#h_shadow_" + this.uuid + ")"; } else return ""; }
-                    }
-                    else {
-                        if (d.data.shadow == null) { if (this.settings.shadow) { return "url(#shadow_" + this.uuid + ")"; } else return ""; }
-                        else { if (d.data.shadow) { return "url(#shadow_" + this.uuid + ")"; } else return ""; }
-                    }
+                .attr("filter", (d: any) => { return d.children ?
+                      (getDataOrSetting(d.data.shadow, this.settings.h_shadow) ? "url(#h_shadow_" + this.uuid + ")" : "") :
+                      (getDataOrSetting(d.data.shadow, this.settings.shadow) ? "url(#shadow_" + this.uuid + ")" : "")
                 });
 
 
@@ -489,6 +471,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             xhr.send();
         };
 
+        // replace images with inline base64 data so they are included when saving svg as png
         function base64Image(image: any) {
             image.each(function() {
                 var img = d3.select(this);
@@ -518,38 +501,27 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .attr("y",      (d: any) => { return d.y0; })
                 .attr("width",  (d: any) => { return d.x1 - d.x0; })
                 .attr("height", (d: any) => { return d.y1 - d.y0; })
-                .attr("fill",   (d: any) => {
-                    if (d.children) {
-                        if (d.data.shading == null) {
-                            return (this.settings.h_shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
-                        }
-                        else {
-                            return (d.data.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
-                        }
-                    }
-                    else {
-                        if (d.data.shading == null) {
-                            return (this.settings.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
-                        }
-                        else {
-                            return (d.data.shading ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString());
-                        }
-                    }
+                .attr("fill", (d: any) => { return d.children ?
+                      (getDataOrSetting(d.data.shading, this.settings.h_shading) ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString()) :
+                      (getDataOrSetting(d.data.shading, this.settings.shading) ? "url(#radialgradient_" + this.uuid + ")" : d3.hsl(0, 0, 0, 0).toString())
                 })
                 .append("title").text((d: any) => { return d.data.name; });
+
 
         // Cell text
         svg.selectAll().data(nodes.leaves()).enter()
             .append("text")
                 .attr("x",           (d: any) => {
-                        if (d.data.halign == "left"   || (d.data.halign == null && this.settings.halign == "left"))   return d.x0 + textPadding(d, scale, text_padding);
-                        if (d.data.halign == "center" || (d.data.halign == null && this.settings.halign == "center")) return d.x0 + 0.5 * (d.x1 - d.x0);
-                        if (d.data.halign == "right"  || (d.data.halign == null && this.settings.halign == "right"))  return d.x1 - textPadding(d, scale, text_padding);
+                      var align = getDataOrSetting(d.data.halign, this.settings.halign);
+                      if (align == "left")   return d.x0 + textPadding(d, scale, text_padding);
+                      if (align == "center") return d.x0 + 0.5 * (d.x1 - d.x0);
+                      if (align == "right")  return d.x1 - textPadding(d, scale, text_padding);
                 })
                 .attr("y",           (d: any) => {
-                    if (d.data.valign == "top"     || (d.data.valign == null && this.settings.valign == "top"))    return d.y0 + textPadding(d, scale, text_padding) + textSize(d, scale, text_size);
-                    if (d.data.valign == "center"  || (d.data.valign == null && this.settings.valign == "center")) return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textSize(d, scale, text_size);
-                    if (d.data.valign == "bottom"  || (d.data.valign == null && this.settings.valign == "bottom")) return d.y1 - textPadding(d, scale, text_padding);
+                      var align = getDataOrSetting(d.data.valign, this.settings.valign);
+                      if (align == "top")    return d.y0 + textPadding(d, scale, text_padding) + textSize(d, scale, text_size);
+                      if (align == "center") return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textSize(d, scale, text_size);
+                      if (align == "bottom") return d.y1 - textPadding(d, scale, text_padding);
                 })
                 .attr("v-align",     (d: any) => { return d.data.valign })
                 .attr("left",        (d: any) => { return d.x0; })
@@ -557,62 +529,64 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * textPadding(d, scale, text_padding); })
                 .attr("height",      (d: any) => { return d.y1 - d.y0 - 2 * textPadding(d, scale, text_padding); })
                 .attr("text-anchor", (d: any) => {
-                      if (d.data.halign == "left"   || (d.data.halign == null && this.settings.halign == "left"))   return "start";
-                      if (d.data.halign == "center" || (d.data.halign == null && this.settings.halign == "center")) return "middle";
-                      if (d.data.halign == "right"  || (d.data.halign == null && this.settings.halign == "right"))  return "end";
+                      var align = getDataOrSetting(d.data.halign, this.settings.halign);
+                      if (align == "left")   return "start";
+                      if (align == "center") return "middle";
+                      if (align == "right")  return "end";
                       return "start";
                 })
                 .attr("font-size",   (d: any) => { return textSize(d, scale, text_size) + "px" })
-                .attr("fill",        (d: any) => {
-                    return d.data.text_color == null ?
-                        d3.hsl(this.settings.text_color[0], this.settings.text_color[1], this.settings.text_color[2], this.settings.text_color[3]).toString() :
-                        d3.hsl(
-                            d.data.text_color.h == null ? this.settings.text_color[0] : d.data.text_color.h,
-                            d.data.text_color.s == null ? this.settings.text_color[1] : d.data.text_color.s,
-                            d.data.text_color.l == null ? this.settings.text_color[2] : d.data.text_color.l,
-                            d.data.text_color.a == null ? this.settings.text_color[3] : d.data.text_color.a).toString()
-                })
+                .attr("fill",        (d: any) => { return getDataOrSetting(d.data.text_color, this.settings.text_color) })
                 .attr("opacity",     (d: any) => { return ((d.y1 - d.y0 < textSize(d, scale, text_size)) || (d.x1 - d.x0 < 2 * textSize(d, scale, text_size))) ? 0 : 1 })
                 .text((d: any) => { return this.settings.show_values ? (d.data.value || 1) + " " + d.data.name : d.data.name; })
                 .call(wrap)
                 .append("title").text((d: any) => { return d.data.name; });
+
 
         // Header text
         if (this.settings.show_headers) {
             svg.selectAll().data(nodes.descendants().filter((d: any) => { return d.children; })).enter()
                 .append("text")
                     .attr("x",           (d: any) => {
-                            if (d.data.halign == "left"   || (d.data.halign == null && this.settings.h_halign == "left"))   return d.x0 + 1.0 * h_text_padding;
-                            if (d.data.halign == "center" || (d.data.halign == null && this.settings.h_halign == "center")) return d.x0 + 0.5 * (d.x1 - d.x0);
-                            if (d.data.halign == "right"  || (d.data.halign == null && this.settings.h_halign == "right"))  return d.x1 - 1.0 * h_text_padding;
-                            return "left";
+                          var align = getDataOrSetting(d.data.halign, this.settings.h_halign);
+                          if (align == "left")   return d.x0 + 1.0 * h_text_padding;
+                          if (align == "center") return d.x0 + 0.5 * (d.x1 - d.x0);
+                          if (align == "right")  return d.x1 - 1.0 * h_text_padding;
                     })
                     .attr("y",           (d: any) => { return d.y0 + h_text_padding + 0.8 * textSize(d, scale, h_text_size) })
                     .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * h_text_padding; })
                     .attr("text-anchor", (d: any) => {
-                          if (d.data.halign == "left"   || (d.data.halign == null && this.settings.h_halign == "left"))   return "start";
-                          if (d.data.halign == "center" || (d.data.halign == null && this.settings.h_halign == "center")) return "middle";
-                          if (d.data.halign == "right"  || (d.data.halign == null && this.settings.h_halign == "right"))  return "end";
+                          var align = getDataOrSetting(d.data.halign, this.settings.h_halign);
+                          if (align == "left")   return "start";
+                          if (align == "center") return "middle";
+                          if (align == "right")  return "end";
                           return "start";
                     })
                     .attr("font-size",   (d: any) => { return textSize(d, scale, h_text_size) + "px" })
-                    .attr("fill",        (d: any) => {
-                        return d.data.text_color == null ?
-                            d3.hsl(
-                                this.settings.h_text_color[0],
-                                this.settings.h_text_color[1],
-                                this.settings.h_text_color[2],
-                                this.settings.h_text_color[3]).toString() :
-                            d3.hsl(
-                                d.data.text_color.h == null ? this.settings.h_text_color[0] : d.data.text_color.h,
-                                d.data.text_color.s == null ? this.settings.h_text_color[1] : d.data.text_color.s,
-                                d.data.text_color.l == null ? this.settings.h_text_color[2] : d.data.text_color.l,
-                                d.data.text_color.a == null ? this.settings.h_text_color[3] : d.data.text_color.a).toString()
-                    })
+                    .attr("fill", (d: any) => { return getDataOrSetting(d.data.text_color, this.settings.h_text_color) })
                     .attr("opacity",     (d: any) => { return ((h_text_size + h_text_padding < textSize(d, scale, h_text_size)) || (d.x1 - d.x0 < textSize(d, scale, h_text_size))) ? 0 : 1 })
                     .text((d: any) => { return d.data.name; })
                     .call(ellipse)
                     .append("title").text((d: any) => { return d.data.name; });
+        }
+
+
+        // helper functions
+        function getDataOrSetting(data: any, setting: any) {
+            if (data != null) {
+                if (typeof data === "object" && !Array.isArray(data)) {
+                    return d3.hsl(
+                        (data.h == null) ? setting[0] : data.h,
+                        (data.s == null) ? setting[1] : data.s,
+                        (data.l == null) ? setting[2] : data.l,
+                        (data.a == null) ? setting[3] : data.a).toString();
+                }
+                else { return data; }
+            }
+            else {
+                if (Array.isArray(setting)) { return d3.hsl(setting[0], setting[1], setting[2], setting[3]).toString(); }
+                else { return setting; }
+            }
         }
 
         function textPadding(d: any, scale: number, padding: number) {
@@ -628,6 +602,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             else return (tspan.node().getComputedTextLength() > width);
         }
 
+        // if text is too long break it into multiple tspans
         function wrap(text: any) {
             text.each(function() {
                 var text = d3.select(this),
@@ -737,6 +712,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             });
         }
 
+        // if header text is too long, cut it down to size and add ellipses
         function ellipse(text: any) {
             text.each(function() {
                 var text = d3.select(this);
