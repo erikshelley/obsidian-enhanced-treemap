@@ -374,6 +374,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 height = svg_element.parentElement.offsetHeight;
             }
             svg_element.setAttribute("viewBox", "0 0 " + width + " " + height);
+            // Need these lines when saving non-fixed width SVG as PNG, otherwise it gets cropped when using scale > 1
+            svg_element.setAttribute("width", width / scale);
+            svg_element.setAttribute("height", height / scale);
         }
 
         var vertical_alignment = this.settings.valign; // this is needed to access them within wrap function
