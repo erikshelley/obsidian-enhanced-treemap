@@ -105,14 +105,13 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
             }
             else {
-                var buttonEl = this.element.querySelector(".save_as_png_button");
-                if (buttonEl != null) {
-                    buttonEl.remove();
-                }
                 var svgEl = this.element.querySelector("#enhancedtreemap_" + this.previous_uuid);
                 if (svgEl != null) {
-                    svgEl.replaceWith(svg);
-                    this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
+                    var parentDivRefresh = svgEl.parentElement;
+                    if (parentDivRefresh != null) {
+                        parentDivRefresh.replaceWith(svg);
+                        this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
+                    }
                 }
             }
         }
@@ -279,7 +278,6 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             let saveButton = new ButtonComponent(wrapper)
                 .setButtonText("Save as PNG")
                 //.setIcon("save") // https://lucide.dev/
-                .setClass("save_as_png_button")
                 .onClick(() => { 
                     d3ToPng("#enhancedtreemap_" + this.uuid, "filename", { scale: 2 });
                 });

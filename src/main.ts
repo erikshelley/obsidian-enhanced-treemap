@@ -1,4 +1,4 @@
-import { App, Plugin, Setting, MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
+import { App, debounce, Plugin, Setting, MarkdownPostProcessorContext, MarkdownView } from 'obsidian';
 import { EnhancedTreemapSettings, EnhancedTreemapSettingTab, DEFAULT_SETTINGS } from './settings';
 import EnhancedTreemap from './enhancedtreemap';
 
@@ -25,11 +25,17 @@ export default class EnhancedTreemapPlugin extends Plugin {
         }
     }
 
+    //private debouncedRefresh: () => void = () => null;
+    //private debouncedRefresh = debounce(() => this.app.workspace.trigger("enhancedtreemap:refresh"), 100, true);
+    //private debouncedRefresh = debounce(() => console.log("debounce called"), 100, true);
+
     async onload() {
         await this.loadSettings();
         this.addSettingTab(new EnhancedTreemapSettingTab(this.app, this));
         this.enhancedtreemap = new EnhancedTreemap(this);
         this.registerMarkdownPostProcessor((el, ctx) => { this.postprocessor(el, ctx) });
+        this.registerEvent(this.app.workspace.on("resize", () => { this.app.workspace.trigger("enhancedtreemap:refresh") }));
+        //this.registerEvent(this.app.workspace.on("resize", () => { this.debouncedRefresh }));
     }
 
     onunload() { }
@@ -38,16 +44,10 @@ export default class EnhancedTreemapPlugin extends Plugin {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()); 
     }
 
-    //private debouncedRefresh: () => void = () => null;
-
     async saveSettings() { 
         await this.saveData(this.settings); 
         this.app.workspace.trigger("enhancedtreemap:refresh");
-        /*this.debouncedRefresh = debounce(
-            () => this.app.workspace.trigger("enhancedtreemap:refresh"),
-			500,
-			true
-		);*/
+        //this.debouncedRefresh = debounce(() => this.app.workspace.trigger("enhancedtreemap:refresh"), 100, true);
     }
 }
 
