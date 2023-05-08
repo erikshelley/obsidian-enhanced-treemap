@@ -33,7 +33,7 @@ export default class EnhancedTreemapPlugin extends Plugin {
 
     // Debounce is used to prevent repeatedly calling a function too quickly
     // The enhancedtreemap:refresh event trigger is defined in src/enhancedtreemap.ts
-    private debouncedRefresh = debounce(() => this.app.workspace.trigger("enhancedtreemap:refresh"), 1000, true);
+    private debouncedRefresh = debounce(() => this.app.workspace.trigger("enhancedtreemap:refresh"), 500, true);
 
     async onload() {
         await this.loadSettings();

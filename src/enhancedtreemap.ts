@@ -1,4 +1,4 @@
-import { ButtonComponent, MarkdownPostProcessorContext, MarkdownRenderChild, setIcon } from 'obsidian';
+import { ButtonComponent, debounce, MarkdownPostProcessorContext, MarkdownRenderChild, setIcon } from 'obsidian';
 import EnhancedTreemapPlugin from './main';
 import { EnhancedTreemapSettings } from './settings';
 import * as d3 from 'd3';
@@ -59,10 +59,10 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         this.pluginsettings       = settings;
     }
 
-    refresh = () => { this.render(); };
+    private debouncedRefresh = debounce(() => this.render(), 500, true);
 
     async onload() {
-        this.registerEvent(this.enhancedtreemap.plugin.app.workspace.on("enhancedtreemap:refresh", this.refresh));
+        this.registerEvent(this.enhancedtreemap.plugin.app.workspace.on("enhancedtreemap:refresh", this.debouncedRefresh));
         this.render();
     }
 
@@ -379,11 +379,10 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
         var svg_element = document.getElementById(this.svg_id);
 
-        // TODO: find a better solution for this - it loops forever waiting
-        // some elements are not added to the DOM until they are visible (eg. scroll down to them)
-        while (svg_element == null) {
-            await new Promise(r => setTimeout(r, 500));
-            svg_element = document.getElementById(this.svg_id);
+        // elements are not always added to the DOM right away
+        if (svg_element == null) {
+            this.debouncedRefresh();
+            return;
         }
 
         var width = this.svg_width;
@@ -427,7 +426,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             .tile(d3.treemapSquarify.ratio(1))
             .size([width, height])
             .paddingOuter(outer_padding)
-            .paddingTop(this.settings.show_headers ? h_text_size + 2 * h_text_padding : outer_padding)
+            .paddingTop(this.settings.show_headers ? outer_padding + h_text_size + 2 * h_text_padding : outer_padding)
             .paddingInner(outer_padding)
             (nodes);
 
@@ -553,7 +552,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                           if (align == "center") return d.x0 + 0.5 * (d.x1 - d.x0);
                           if (align == "right")  return d.x1 - 1.0 * h_text_padding;
                     })
-                    .attr("y",           (d: any) => { return d.y0 + h_text_padding + 0.8 * textSize(d, scale, h_text_size) })
+                    .attr("y",           (d: any) => { return d.y0 + outer_padding/2 + h_text_padding + 0.8 * textSize(d, scale, h_text_size) })
                     .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * h_text_padding; })
                     .attr("text-anchor", (d: any) => {
                           var align = getDataOrSetting(d.data.halign, this.settings.h_halign);
