@@ -12,13 +12,13 @@ export default class EnhancedTreemapPlugin extends Plugin {
        in the code block the renderEnhancedTreemap method is called in the EnhancedTreemap class.
     */
     postprocessor = async (element: HTMLElement, context: MarkdownPostProcessorContext) => {
-        var codeblock = element.querySelector("code");
+        const codeblock = element.querySelector("code");
         if (codeblock != null) {
-            var text = codeblock.textContent;
+            const text = codeblock.textContent;
             if (text != null) {
                 try {
-                    var data = JSON.parse(text);
-                    var type = data.type;
+                    const data = JSON.parse(text);
+                    const type = data.type;
                     if (type == "enhancedtreemap") {
                         await this.enhancedtreemap.renderEnhancedTreemap(element, context);
                     }
@@ -38,14 +38,12 @@ export default class EnhancedTreemapPlugin extends Plugin {
     async onload() {
         await this.loadSettings();
         this.addSettingTab(new EnhancedTreemapSettingTab(this.app, this));
-        this.enhancedtreemap = new EnhancedTreemap(this);
+        this.enhancedtreemap = new EnhancedTreemap(this.app, this);
         this.registerMarkdownPostProcessor((el, ctx) => { this.postprocessor(el, ctx) });
         this.registerEvent(this.app.workspace.on("resize", this.debouncedRefresh ));
     }
 
-    onunload() {
-        this.app.workspace.off("resize", this.debouncedRefresh );
-    }
+    onunload() { }
 
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());

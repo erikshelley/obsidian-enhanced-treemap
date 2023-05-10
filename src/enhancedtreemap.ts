@@ -1,4 +1,4 @@
-import { ButtonComponent, debounce, MarkdownPostProcessorContext, MarkdownRenderChild, setIcon } from 'obsidian';
+import { App, ButtonComponent, debounce, MarkdownPostProcessorContext, MarkdownRenderChild, setIcon } from 'obsidian';
 import EnhancedTreemapPlugin from './main';
 import { EnhancedTreemapSettings } from './settings';
 import * as d3 from 'd3';
@@ -14,17 +14,19 @@ declare module "obsidian" {
 
 
 export default class EnhancedTreemap {
+    app:    App;
     plugin: EnhancedTreemapPlugin;
 
-    constructor(plugin: EnhancedTreemapPlugin) {
+    constructor(app: App, plugin: EnhancedTreemapPlugin) {
+        this.app = app;
         this.plugin = plugin;
     }
 
     async renderEnhancedTreemap(element: HTMLElement, ctx: MarkdownPostProcessorContext) {
-        var renderer: EnhancedTreemapRenderChild;
+        let renderer: EnhancedTreemapRenderChild;
 
         await this.plugin.app.workspace.onLayoutReady(() => {
-            renderer = new EnhancedTreemapRenderChild(element, this, ctx, this.plugin.settings);
+            renderer = new EnhancedTreemapRenderChild(this.app, element, this, ctx, this.plugin.settings);
             ctx.addChild(renderer);
         });
     }
@@ -32,7 +34,7 @@ export default class EnhancedTreemap {
 
 
 class EnhancedTreemapRenderChild extends MarkdownRenderChild {
-    basePath:             string;
+    app:                  App;
     ctx:                  MarkdownPostProcessorContext;
     data:                 any;
     uuid:                 number;
@@ -47,8 +49,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     svg_id:               string;
     svg_width:            number;
 
-    constructor(element: HTMLElement, enhancedtreemap: EnhancedTreemap, ctx: MarkdownPostProcessorContext, settings: EnhancedTreemapSettings) {
+    constructor(app: App, element: HTMLElement, enhancedtreemap: EnhancedTreemap, ctx: MarkdownPostProcessorContext, settings: EnhancedTreemapSettings) {
         super(element);
+        this.app                  = app;
         this.ctx                  = ctx;
         this.element              = element;
         this.enhancedtreemap      = enhancedtreemap;
@@ -83,15 +86,15 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         const wrapper = document.createElement("div");
         wrapper.textContent = message;
         wrapper.setAttribute("style", "color: red");
-        var parentDiv = this.element.querySelector("pre");
+        const parentDiv = this.element.querySelector("pre");
         if (parentDiv != null) parentDiv.replaceWith(wrapper);
     }
 
     // make sure the JSON can be parsed
     verifyJSON() {
-        var code = this.element.querySelector("code");
+        const code = this.element.querySelector("code");
         if (code != null) {
-            var json = code.textContent;
+            const json = code.textContent;
             if (json != null) {
                 try {
                     this.data = JSON.parse(json);
@@ -126,14 +129,14 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     parseSettings() {
         if (this.data == null) return;
         if (this.error) return;
-        var settings: Array<any>;
+        let settings: Array<any>;
         settings = this.data.settings;
         if (settings) {
             settings.forEach(setting => {
                 // Treemap Settings
                 if (setting.aspect_ratio != null) {
-                    var aspect = 1;
-                    var ratio = setting.aspect_ratio.split(":");
+                    let aspect = 1;
+                    const ratio = setting.aspect_ratio.split(":");
                     if (ratio[0] == 0 || ratio[1] == 0) this.handleError("aspect_ratio cannot include any zeros");
                     else aspect = ratio[0] / ratio[1];
                     this.settings.aspect_ratio = this.verifyNumber(aspect, "aspect_ratio", 0, Number.MAX_SAFE_INTEGER);
@@ -353,17 +356,17 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     // add the empty SVG in place of the code block
     addEmptySVG() {
         if (this.error) return;
-        var svg = this.emptySVG();
+        const svg = this.emptySVG();
         if (svg != null) {
-            var parentDiv = this.element.querySelector("pre");
+            const parentDiv = this.element.querySelector("pre");
             if (parentDiv != null) {
                 parentDiv.replaceWith(svg);
                 this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
             }
             else { // if a refresh happens while in reader view there is no pre element, only our substituted elements
-                var svgEl = this.element.querySelector("#enhancedtreemap_" + this.previous_uuid);
+                const svgEl = this.element.querySelector("#enhancedtreemap_" + this.previous_uuid);
                 if (svgEl != null) {
-                    var parentDivRefresh = svgEl.parentElement;
+                    const parentDivRefresh = svgEl.parentElement;
                     if (parentDivRefresh != null) {
                         parentDivRefresh.replaceWith(svg);
                         this.svg = this.element.querySelector("#enhancedtreemap_" + this.uuid);
@@ -377,7 +380,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
     async renderEnhancedTreemap() {
         if (this.error) return;
 
-        var svg_element = document.getElementById(this.svg_id);
+        const svg_element = document.getElementById(this.svg_id);
 
         // elements are not always added to the DOM right away
         if (svg_element == null) {
@@ -385,9 +388,9 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             return;
         }
 
-        var width = this.svg_width;
-        var height = this.svg_height;
-        var scale = 1;
+        let width = this.svg_width;
+        let height = this.svg_height;
+        let scale = 1;
 
         // resize SVG to 100% width if it is not fixed width
         if (!this.settings.fixed_width) {
@@ -402,18 +405,18 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             svg_element.setAttribute("height", (height / scale).toString());
         }
 
-        var vertical_alignment   = this.settings.valign; // this is needed to access them within wrap function
-        var horizontal_alignment = this.settings.halign; // this is needed to access them within wrap function
-        var outer_padding        = this.settings.outer_padding * scale;
-        var text_padding         = this.settings.text_padding * scale;
-        var h_text_padding       = this.settings.h_text_padding * scale;
-        var text_size            = this.settings.text_size * scale;
-        var h_text_size          = this.settings.h_text_size * scale;
+        const vertical_alignment   = this.settings.valign; // this is needed to access them within wrap function
+        const horizontal_alignment = this.settings.halign; // this is needed to access them within wrap function
+        const outer_padding        = this.settings.outer_padding * scale;
+        const text_padding         = this.settings.text_padding * scale;
+        const h_text_padding       = this.settings.h_text_padding * scale;
+        const text_size            = this.settings.text_size * scale;
+        const h_text_size          = this.settings.h_text_size * scale;
 
 
         // load json data into hierarchy of nodes
         // the ||!d.children adds a default value of 1 for any leaf nodes with no value
-        var nodes;
+        let nodes;
         if (this.settings.sort_by_value) {
             nodes = d3.hierarchy(this.data).sum((d: any) => { return d.value||!d.children; }).sort((a: any, b: any) => b.value - a.value);
         }
@@ -422,7 +425,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         }
 
         // add positions to the nodes using the treemap layout
-        var treemapLayout = d3.treemap()
+        const treemapLayout = d3.treemap()
             .tile(d3.treemapSquarify.ratio(1))
             .size([width, height])
             .paddingOuter(outer_padding)
@@ -431,7 +434,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             (nodes);
 
         // add group to the SVG to hold the treemap elements
-        var svg = d3.select(this.svg).append("g");
+        let svg = d3.select(this.svg).append("g");
 
         // Cell rectangles
         // use decendants instead of leaves to show all nodes, not just the leaves
@@ -456,10 +459,10 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
 
 
         // Images
-        var toDataURL = function(url: string, callback: any) {
-            var xhr = new XMLHttpRequest();
+        const toDataURL = function(url: string, callback: any) {
+            const xhr = new XMLHttpRequest();
             xhr.onload = function() {
-                var reader = new FileReader();
+                const reader = new FileReader();
                 reader.onloadend = function() {
                     callback(reader.result);
                 }
@@ -473,8 +476,8 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         // replace images with inline base64 data so they are included when saving svg as png
         function base64Image(image: any) {
             image.each(function() {
-                var img = d3.select(this);
-                var url = img.attr("href");
+                const img = d3.select(this);
+                const url = img.attr("href");
                 toDataURL(url, (imageData: any) => {
                     img.attr("href", imageData);
                 });
@@ -489,7 +492,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .attr("height",     (d: any) => { return d.y1 - d.y0; })
                 .attr("xlink:href", (d: any) => {
                     if (d.data.image.includes("://")) return d.data.image;
-                    else return "app://local/" + this.settings.basePath + d.data.image; })
+                    else return this.app.vault.adapter.getResourcePath(d.data.image); })
                 .call(base64Image);
 
 
@@ -511,13 +514,13 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         svg.selectAll().data(nodes.leaves()).enter()
             .append("text")
                 .attr("x",           (d: any) => {
-                      var align = getDataOrSetting(d.data.halign, this.settings.halign);
+                      const align = getDataOrSetting(d.data.halign, this.settings.halign);
                       if (align == "left")   return d.x0 + textPadding(d, scale, text_padding);
                       if (align == "center") return d.x0 + 0.5 * (d.x1 - d.x0);
                       if (align == "right")  return d.x1 - textPadding(d, scale, text_padding);
                 })
                 .attr("y",           (d: any) => {
-                      var align = getDataOrSetting(d.data.valign, this.settings.valign);
+                      const align = getDataOrSetting(d.data.valign, this.settings.valign);
                       if (align == "top")    return d.y0 + textPadding(d, scale, text_padding) + textSize(d, scale, text_size);
                       if (align == "center") return d.y0 + 0.5 * (d.y1 - d.y0) + 0.3 * textSize(d, scale, text_size);
                       if (align == "bottom") return d.y1 - textPadding(d, scale, text_padding);
@@ -528,7 +531,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                 .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * textPadding(d, scale, text_padding); })
                 .attr("height",      (d: any) => { return d.y1 - d.y0 - 2 * textPadding(d, scale, text_padding); })
                 .attr("text-anchor", (d: any) => {
-                      var align = getDataOrSetting(d.data.halign, this.settings.halign);
+                      const align = getDataOrSetting(d.data.halign, this.settings.halign);
                       if (align == "left")   return "start";
                       if (align == "center") return "middle";
                       if (align == "right")  return "end";
@@ -547,7 +550,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
             svg.selectAll().data(nodes.descendants().filter((d: any) => { return d.children; })).enter()
                 .append("text")
                     .attr("x",           (d: any) => {
-                          var align = getDataOrSetting(d.data.halign, this.settings.h_halign);
+                          const align = getDataOrSetting(d.data.halign, this.settings.h_halign);
                           if (align == "left")   return d.x0 + 1.0 * h_text_padding;
                           if (align == "center") return d.x0 + 0.5 * (d.x1 - d.x0);
                           if (align == "right")  return d.x1 - 1.0 * h_text_padding;
@@ -555,7 +558,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     .attr("y",           (d: any) => { return d.y0 + outer_padding/2 + h_text_padding + 0.8 * textSize(d, scale, h_text_size) })
                     .attr("width",       (d: any) => { return d.x1 - d.x0 - 2 * h_text_padding; })
                     .attr("text-anchor", (d: any) => {
-                          var align = getDataOrSetting(d.data.halign, this.settings.h_halign);
+                          const align = getDataOrSetting(d.data.halign, this.settings.h_halign);
                           if (align == "left")   return "start";
                           if (align == "center") return "middle";
                           if (align == "right")  return "end";
@@ -604,7 +607,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         // if text is too long break it into multiple tspans
         function wrap(text: any) {
             text.each(function() {
-                var text = d3.select(this),
+                let text = d3.select(this),
                     words = text.text().split(/([_-\s])/).reverse(),
                     word,
                     longline,
@@ -702,7 +705,7 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
                     }
                 }
                 if (lineNumber > 0) {
-                    var startDy: number;
+                    let startDy: number;
                     if (valign == "top") startDy = 0;
                     if (valign == "center") startDy = -0.5 * lineNumber * lineHeight;
                     if (valign == "bottom") startDy = -lineNumber * lineHeight;
@@ -714,10 +717,10 @@ class EnhancedTreemapRenderChild extends MarkdownRenderChild {
         // if header text is too long, cut it down to size and add ellipses
         function ellipse(text: any) {
             text.each(function() {
-                var text = d3.select(this);
-                var width = parseFloat(text.attr("width"));
-                var original = text.text();
-                var tspan = text.text("").append("tspan").text(original);
+                const text = d3.select(this);
+                const width = parseFloat(text.attr("width"));
+                const original = text.text();
+                let tspan = text.text("").append("tspan").text(original);
                 if (!checkWidth(tspan, width)) return;
                 tspan.text(original + "...");
                 while (checkWidth(tspan, width) && tspan.text().length > 3) {
